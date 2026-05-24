@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CINEMORTAL — Filmes para ver antes de morrer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0807;
+  --bg2:#120e0b;
+  --panel:#16110d;
+  --panel2:#1d1712;
+  --ink:#f4ece0;
+  --ink-dim:#b8a890;
+  --ink-faint:#7d6f5e;
+  --gold:#e8b75c;
+  --gold-bright:#ffd27a;
+  --gold-deep:#b8862f;
+  --red:#8c2b22;
+  --red-bright:#c2452f;
+  --line:rgba(232,183,92,0.14);
+  --line-soft:rgba(255,255,255,0.06);
+  --shadow:0 24px 60px -20px rgba(0,0,0,0.85);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(232,183,92,0.10), transparent 60%),
+    radial-gradient(900px 600px at 85% 110%, rgba(140,43,34,0.18), transparent 55%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:'Sora',system-ui,sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  letter-spacing:.01em;
+}
+/* film grain overlay */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
+  opacity:.045;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1.1s steps(3) infinite;
+}
+@keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-4%,2%)}66%{transform:translate(3%,-3%)}100%{transform:translate(0,0)}}
+/* vignette */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9998;
+  box-shadow:inset 0 0 220px 40px rgba(0,0,0,.85);}
+
+::selection{background:var(--gold);color:#1a1410}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+
+/* ---------- HEADER ---------- */
+header{position:relative;padding:54px 22px 30px;text-align:center;z-index:2}
+.marquee-frame{
+  display:inline-block;position:relative;padding:18px 40px;
+  border:1px solid var(--line);border-radius:8px;
+  background:linear-gradient(180deg,rgba(232,183,92,.05),rgba(0,0,0,.2));
+  box-shadow:0 0 0 1px rgba(0,0,0,.4), inset 0 0 40px rgba(232,183,92,.06);
+}
+.marquee-frame::before,.marquee-frame::after{
+  content:"";position:absolute;left:8px;right:8px;height:7px;
+  background-image:radial-gradient(circle,var(--gold-bright) 0 2.2px, transparent 2.6px);
+  background-size:18px 7px;background-position:center;opacity:.9;
+  filter:drop-shadow(0 0 4px var(--gold));
+  animation:bulbs 1.4s steps(2) infinite;
+}
+.marquee-frame::before{top:-3px}.marquee-frame::after{bottom:-3px}
+@keyframes bulbs{0%{opacity:.95}50%{opacity:.45}100%{opacity:.95}}
+h1{
+  font-family:'Anton',sans-serif;font-weight:400;
+  font-size:clamp(40px,9vw,92px);line-height:.92;letter-spacing:.04em;
+  background:linear-gradient(180deg,#fff,var(--gold) 55%,var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 2px 30px rgba(232,183,92,.25);
+}
+.tagline{font-family:'Fraunces',serif;font-style:italic;color:var(--ink-dim);
+  font-size:clamp(13px,2.4vw,18px);margin-top:12px;letter-spacing:.02em}
+.sub-count{margin-top:6px;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* ---------- STATS ---------- */
+.stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:26px auto 0;max-width:680px;padding:0 18px}
+.stat{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line-soft);
+  border-radius:12px;padding:14px 10px;text-align:center;position:relative;overflow:hidden}
+.stat .num{font-family:'Anton',sans-serif;font-size:30px;color:var(--gold-bright);line-height:1}
+.stat .lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-top:6px}
+.stat .bar{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-bright));transition:width .6s ease}
+
+/* ---------- CTA ---------- */
+.cta-wrap{text-align:center;margin:34px auto 6px;position:relative;z-index:2}
+.btn-draw{
+  position:relative;font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.16em;
+  color:#1a1208;padding:20px 56px;border:none;border-radius:60px;
+  background:linear-gradient(180deg,var(--gold-bright),var(--gold) 45%,var(--gold-deep));
+  box-shadow:0 10px 30px -6px rgba(232,183,92,.5), inset 0 1px 0 rgba(255,255,255,.6);
+  transition:transform .18s cubic-bezier(.2,1.4,.4,1), box-shadow .25s;
+  text-shadow:0 1px 0 rgba(255,255,255,.4);
+}
+.btn-draw:hover{transform:translateY(-3px) scale(1.025);box-shadow:0 18px 44px -8px rgba(232,183,92,.65)}
+.btn-draw:active{transform:translateY(0) scale(.98)}
+.btn-draw .ico{display:inline-block;margin-right:10px;transform:translateY(2px)}
+.draw-hint{margin-top:12px;font-size:12px;color:var(--ink-faint);letter-spacing:.04em}
+.btn-draw[disabled]{filter:grayscale(.7) brightness(.7);cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ---------- WARNING BANNER ---------- */
+.notice{max-width:860px;margin:30px auto 0;padding:0 18px}
+.notice-inner{display:flex;gap:12px;align-items:flex-start;background:rgba(140,43,34,.12);
+  border:1px solid rgba(194,69,47,.3);border-left:3px solid var(--red-bright);
+  border-radius:10px;padding:13px 16px;font-size:13px;color:var(--ink-dim);line-height:1.5}
+.notice-inner b{color:var(--gold)}
+
+/* ---------- FILTERS ---------- */
+.controls{max-width:1180px;margin:40px auto 0;padding:0 18px}
+.controls-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.controls-head h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.14em;color:var(--ink)}
+.controls-head .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.field label{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px}
+.field select,.field input{
+  width:100%;background:var(--panel2);border:1px solid var(--line-soft);color:var(--ink);
+  padding:11px 13px;border-radius:9px;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.field select:focus,.field input:focus{border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(232,183,92,.12)}
+.field input::placeholder{color:var(--ink-faint)}
+.filters-actions{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.chip-toggle{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line-soft);
+  color:var(--ink-dim);padding:9px 15px;border-radius:30px;font-size:13px;transition:.2s}
+.chip-toggle input{accent-color:var(--gold)}
+.chip-toggle:hover{border-color:var(--gold-deep);color:var(--ink)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink-dim);
+  padding:9px 16px;border-radius:30px;font-size:13px;letter-spacing:.05em;transition:.2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-bright)}
+.result-count{margin-left:auto;font-size:12px;color:var(--ink-faint);letter-spacing:.06em}
+
+/* ---------- GRID ---------- */
+.grid{max-width:1180px;margin:26px auto 80px;padding:0 18px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
+.card{position:relative;cursor:pointer;border-radius:10px;overflow:hidden;
+  transform:translateY(14px);opacity:0;animation:rise .55s forwards;
+  transition:transform .3s cubic-bezier(.2,.9,.3,1.1)}
+@keyframes rise{to{transform:translateY(0);opacity:1}}
+.card:hover{transform:translateY(-6px)}
+.card:hover .poster{box-shadow:0 22px 44px -14px rgba(0,0,0,.9), 0 0 0 1px var(--gold-deep)}
+.poster{position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;
+  box-shadow:0 14px 30px -16px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.05);
+  transition:box-shadow .3s;display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+.poster .grain{position:absolute;inset:0;opacity:.5;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.poster .glow{position:absolute;inset:0;background:radial-gradient(120% 60% at 50% 0%,rgba(255,255,255,.18),transparent 60%)}
+.poster .vig{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.78))}
+.poster .yr{position:relative;font-family:'Anton',sans-serif;font-size:13px;color:var(--gold-bright);letter-spacing:.08em;opacity:.9}
+.poster .tt{position:relative;font-family:'Anton',sans-serif;font-size:clamp(15px,2.4vw,19px);line-height:1.02;
+  color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.8);margin-top:3px;letter-spacing:.01em}
+.poster .gn{position:relative;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-top:8px}
+.card .seen-badge{position:absolute;top:9px;right:9px;z-index:3;background:rgba(10,8,7,.82);
+  border:1px solid var(--gold-deep);color:var(--gold-bright);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;padding:4px 8px;border-radius:20px;display:none;backdrop-filter:blur(4px)}
+.card.is-seen .seen-badge{display:block}
+.card.is-seen .poster{filter:grayscale(.55) brightness(.62)}
+.card .mini-stars{position:absolute;top:9px;left:9px;z-index:3;font-size:11px;color:var(--gold-bright);
+  text-shadow:0 1px 3px #000;display:none}
+.card.has-rating .mini-stars{display:block}
+.stream-tag{position:absolute;bottom:0;left:0;right:0;z-index:3;font-size:9px;letter-spacing:.1em;
+  text-transform:uppercase;text-align:center;padding:6px;color:var(--ink);
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.9));opacity:0;transition:opacity .25s}
+.card:hover .stream-tag{opacity:1}
+
+.empty{grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--ink-faint)}
+.empty .big{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.1em;color:var(--ink-dim)}
+
+/* ---------- DRAW OVERLAY ---------- */
+.draw-overlay{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 40%,rgba(20,14,9,.96),rgba(5,4,3,.99));backdrop-filter:blur(6px)}
+.draw-overlay.active{display:flex}
+.spotlight{position:absolute;inset:0;background:radial-gradient(420px 420px at 50% 46%,rgba(232,183,92,.16),transparent 70%);
+  pointer-events:none;animation:sweep 3.5s ease-in-out infinite}
+@keyframes sweep{0%,100%{transform:translateX(-8%)}50%{transform:translateX(8%)}}
+.reel-stage{width:min(94vw,720px);text-align:center;position:relative;z-index:2}
+.reel-title{font-family:'Bebas Neue',sans-serif;letter-spacing:.3em;color:var(--gold);font-size:16px;margin-bottom:22px;
+  text-transform:uppercase;opacity:.9}
+.reel-window{position:relative;height:300px;overflow:hidden;border-radius:14px;
+  border:1px solid var(--line);box-shadow:inset 0 0 60px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.5);
+  background:#0c0907;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+.reel-track{display:flex;gap:16px;position:absolute;top:50%;left:0;transform:translateY(-50%);padding-left:50%;will-change:transform}
+.reel-item{flex:0 0 auto;width:180px;height:268px;border-radius:10px;overflow:hidden;position:relative;
+  display:flex;flex-direction:column;justify-content:flex-end;padding:12px;
+  box-shadow:0 10px 30px -12px #000, inset 0 0 0 1px rgba(255,255,255,.05)}
+.reel-item .tt{font-family:'Anton',sans-serif;font-size:16px;color:#fff;position:relative;text-shadow:0 2px 8px #000;line-height:1.02}
+.reel-item .yr{font-family:'Anton',sans-serif;font-size:12px;color:var(--gold-bright);position:relative}
+.reel-marker{position:absolute;top:0;bottom:0;left:50%;width:2px;transform:translateX(-50%);
+  background:linear-gradient(180deg,transparent,var(--gold-bright),transparent);z-index:5;
+  box-shadow:0 0 18px 4px rgba(232,183,92,.5)}
+.reel-marker::before,.reel-marker::after{content:"";position:absolute;left:50%;transform:translateX(-50%);
+  border-left:8px solid transparent;border-right:8px solid transparent}
+.reel-marker::before{top:-2px;border-top:11px solid var(--gold-bright)}
+.reel-marker::after{bottom:-2px;border-bottom:11px solid var(--gold-bright)}
+.draw-skip{margin-top:26px;background:transparent;border:1px solid var(--line);color:var(--ink-faint);
+  padding:8px 18px;border-radius:30px;font-size:12px;letter-spacing:.1em;transition:.2s}
+.draw-skip:hover{border-color:var(--gold);color:var(--gold)}
+
+/* reveal card inside overlay */
+.reveal{display:none;width:min(94vw,560px);position:relative;z-index:2;text-align:center;
+  animation:revealIn .7s cubic-bezier(.16,1,.3,1)}
+.reveal.show{display:block}
+@keyframes revealIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:none}}
+.reveal .crown{font-family:'Bebas Neue',sans-serif;letter-spacing:.34em;color:var(--gold);font-size:15px;text-transform:uppercase;margin-bottom:18px}
+.reveal-poster{width:230px;aspect-ratio:2/3;margin:0 auto;border-radius:12px;overflow:hidden;position:relative;
+  display:flex;flex-direction:column;justify-content:flex-end;padding:16px;
+  box-shadow:0 30px 70px -16px rgba(0,0,0,.9), 0 0 60px rgba(232,183,92,.35), 0 0 0 1px var(--gold-deep);
+  animation:posterGlow 2.4s ease-in-out infinite}
+@keyframes posterGlow{0%,100%{box-shadow:0 30px 70px -16px rgba(0,0,0,.9),0 0 50px rgba(232,183,92,.3),0 0 0 1px var(--gold-deep)}50%{box-shadow:0 30px 70px -16px rgba(0,0,0,.9),0 0 80px rgba(232,183,92,.55),0 0 0 1px var(--gold)}}
+.reveal-poster .tt{font-family:'Anton',sans-serif;font-size:22px;color:#fff;position:relative;text-shadow:0 2px 10px #000;line-height:1.02}
+.reveal-poster .yr{font-family:'Anton',sans-serif;font-size:14px;color:var(--gold-bright);position:relative}
+.reveal h3{font-family:'Anton',sans-serif;font-size:clamp(26px,5vw,40px);margin-top:22px;line-height:1.04;
+  background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.reveal .meta{color:var(--ink-dim);font-size:13px;margin-top:8px;letter-spacing:.03em}
+.reveal .stream-pill{display:inline-block;margin-top:14px;padding:7px 16px;border-radius:30px;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--gold-deep);color:var(--gold-bright);background:rgba(232,183,92,.08)}
+.reveal-actions{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+.btn-primary{background:linear-gradient(180deg,var(--gold-bright),var(--gold-deep));color:#1a1208;border:none;
+  padding:13px 26px;border-radius:30px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.1em;transition:transform .15s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-sec{background:transparent;border:1px solid var(--line);color:var(--ink);padding:13px 24px;border-radius:30px;
+  font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.1em;transition:.2s}
+.btn-sec:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ---------- MODAL ---------- */
+.modal{position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(4,3,2,.86);backdrop-filter:blur(8px)}
+.modal.active{display:flex;animation:fade .3s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal-card{width:min(96vw,860px);max-height:92vh;overflow-y:auto;background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);position:relative;
+  animation:modalIn .4s cubic-bezier(.16,1,.3,1)}
+@keyframes modalIn{from{transform:translateY(30px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+.modal-card::-webkit-scrollbar{width:10px}.modal-card::-webkit-scrollbar-thumb{background:var(--gold-deep);border-radius:8px}
+.modal-top{display:flex;gap:24px;padding:26px;flex-wrap:wrap}
+.modal-poster{width:200px;aspect-ratio:2/3;border-radius:12px;overflow:hidden;flex:0 0 auto;position:relative;
+  display:flex;flex-direction:column;justify-content:flex-end;padding:14px;box-shadow:0 20px 40px -16px #000}
+.modal-poster .tt{font-family:'Anton',sans-serif;font-size:18px;color:#fff;position:relative;text-shadow:0 2px 8px #000;line-height:1.02}
+.modal-poster .yr{font-family:'Anton',sans-serif;font-size:12px;color:var(--gold-bright);position:relative}
+.modal-info{flex:1;min-width:240px}
+.modal-info .orig{font-family:'Fraunces',serif;font-style:italic;color:var(--ink-faint);font-size:14px;margin-top:2px}
+.modal-info h2{font-family:'Anton',sans-serif;font-size:clamp(26px,4.5vw,38px);line-height:1.02;
+  background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 11px;border-radius:20px;
+  border:1px solid var(--line-soft);color:var(--ink-dim);background:rgba(255,255,255,.02)}
+.tag.stream{border-color:var(--gold-deep);color:var(--gold-bright);background:rgba(232,183,92,.07)}
+.modal-info .row{margin-top:14px;font-size:13px;color:var(--ink-dim);line-height:1.6}
+.modal-info .row b{color:var(--ink);font-weight:600}
+.synopsis{font-family:'Fraunces',serif;font-size:16px;line-height:1.65;color:var(--ink);padding:0 26px 6px}
+.modal-divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:22px 26px}
+.review{padding:0 26px 26px}
+.review h4{font-family:'Bebas Neue',sans-serif;letter-spacing:.16em;font-size:18px;color:var(--gold);margin-bottom:14px}
+.rate-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.stars{display:flex;gap:5px}
+.star{font-size:30px;color:var(--ink-faint);cursor:pointer;transition:transform .12s,color .15s;line-height:1}
+.star:hover{transform:scale(1.18)}
+.star.on{color:var(--gold-bright);text-shadow:0 0 14px rgba(232,183,92,.6)}
+.rate-label{font-size:12px;color:var(--ink-faint);letter-spacing:.08em}
+.comment-box{width:100%;margin-top:16px;background:var(--bg);border:1px solid var(--line-soft);border-radius:10px;
+  color:var(--ink);padding:13px 14px;font-family:'Sora',sans-serif;font-size:14px;line-height:1.5;resize:vertical;min-height:84px;outline:none}
+.comment-box:focus{border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(232,183,92,.1)}
+.review-actions{display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.toggle-seen{display:inline-flex;align-items:center;gap:10px;cursor:pointer;background:var(--bg);
+  border:1px solid var(--line-soft);padding:10px 16px;border-radius:30px;font-size:13px;color:var(--ink-dim);transition:.2s}
+.toggle-seen:hover{border-color:var(--gold-deep)}
+.toggle-seen.on{border-color:var(--gold);color:var(--gold-bright);background:rgba(232,183,92,.08)}
+.toggle-seen .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink-faint);transition:.2s}
+.toggle-seen.on .dot{background:var(--gold-bright);border-color:var(--gold-bright);box-shadow:0 0 10px var(--gold)}
+.save-note{font-size:12px;color:var(--gold);opacity:0;transition:opacity .3s;letter-spacing:.06em}
+.save-note.show{opacity:1}
+.modal-close{position:absolute;top:16px;right:16px;z-index:4;width:38px;height:38px;border-radius:50%;
+  background:rgba(0,0,0,.5);border:1px solid var(--line-soft);color:var(--ink);font-size:20px;line-height:1;
+  display:flex;align-items:center;justify-content:center;transition:.2s}
+.modal-close:hover{border-color:var(--gold);color:var(--gold);transform:rotate(90deg)}
+
+/* ---------- FOOTER ---------- */
+footer{text-align:center;padding:40px 20px 60px;color:var(--ink-faint);font-size:12px;letter-spacing:.05em;border-top:1px solid var(--line-soft)}
+footer .gold{color:var(--gold-deep)}
+
+/* sound toggle */
+.sound-toggle{position:fixed;top:18px;right:18px;z-index:1200;width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line);color:var(--gold);font-size:18px;display:flex;
+  align-items:center;justify-content:center;transition:.2s;box-shadow:var(--shadow)}
+.sound-toggle:hover{border-color:var(--gold);transform:scale(1.08)}
+
+@media(max-width:560px){
+  .reel-window{height:240px}.reel-item{width:140px;height:210px}
+  .modal-top{padding:18px}.modal-poster{width:140px;margin:0 auto}
+  .synopsis{padding:0 18px}.modal-divider{margin:18px}.review{padding:0 18px 22px}
+  .btn-draw{padding:18px 40px;font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<button class="sound-toggle" id="soundToggle" title="Som do sorteio" aria-label="Alternar som">&#128263;</button>
+
+<header>
+  <div class="marquee-frame">
+    <h1>CINEMORTAL</h1>
+  </div>
+  <p class="tagline">Os filmes que você precisa ver antes de morrer.</p>
+  <p class="sub-count"><span id="catalogCount">0</span> obras-primas no catálogo</p>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="stTotal">0</div><div class="lbl">No catálogo</div><div class="bar" style="width:100%"></div></div>
+    <div class="stat"><div class="num" id="stSeen">0</div><div class="lbl">Já vistos</div><div class="bar" id="barSeen" style="width:0%"></div></div>
+    <div class="stat"><div class="num" id="stLeft">0</div><div class="lbl">Para sortear</div><div class="bar" id="barLeft" style="width:100%"></div></div>
+  </div>
+
+  <div class="cta-wrap">
+    <button class="btn-draw" id="btnDraw"><span class="ico">&#127902;</span>SORTEAR FILME</button>
+    <p class="draw-hint" id="drawHint">Respeita seus filtros · sorteia apenas entre os não vistos</p>
+  </div>
+
+  <div class="notice">
+    <div class="notice-inner">
+      <span style="font-size:16px">&#9888;&#65039;</span>
+      <span>O streaming indicado é uma <b>sugestão de onde a obra costuma estar disponível por assinatura</b> (Apple TV+, Disney+, Globoplay, HBO Max, Netflix, Paramount+, Prime Video, +SBT, Mercado Play, Universal+). Catálogos mudam com frequência — confira no app antes de assistir. Tudo que você marcar e avaliar fica <b>salvo neste navegador</b>.</span>
+    </div>
+  </div>
+</header>
+
+<section class="controls">
+  <div class="controls-head"><h2>Filtrar o acervo</h2><div class="rule"></div></div>
+  <div class="filters">
+    <div class="field"><label>Gênero</label><select id="fGenre"><option value="">Todos os gêneros</option></select></div>
+    <div class="field"><label>Streaming</label><select id="fStream"><option value="">Todos os streamings</option></select></div>
+    <div class="field"><label>Década / Ano</label><select id="fDecade"><option value="">Qualquer época</option></select></div>
+    <div class="field"><label>Direção</label><input id="fDirector" type="text" placeholder="Ex.: Kubrick, Coppola..."></div>
+    <div class="field"><label>Elenco (ator / atriz)</label><input id="fCast" type="text" placeholder="Ex.: Al Pacino, Meryl Streep..."></div>
+    <div class="field"><label>Buscar título</label><input id="fTitle" type="text" placeholder="Nome do filme..."></div>
+  </div>
+  <div class="filters-actions">
+    <label class="chip-toggle"><input type="checkbox" id="fHideSeen"> Ocultar já vistos</label>
+    <label class="chip-toggle"><input type="checkbox" id="fOnlyRated"> Só avaliados por mim</label>
+    <button class="btn-ghost" id="btnClear">Limpar filtros</button>
+    <span class="result-count" id="resultCount">0 filmes</span>
+  </div>
+</section>
+
+<section class="grid" id="grid"></section>
+
+<!-- DRAW OVERLAY -->
+<div class="draw-overlay" id="drawOverlay">
+  <div class="spotlight"></div>
+  <div class="reel-stage" id="reelStage">
+    <div class="reel-title">Sorteando sua próxima sessão…</div>
+    <div class="reel-window"><div class="reel-marker"></div><div class="reel-track" id="reelTrack"></div></div>
+    <button class="draw-skip" id="drawSkip">pular animação</button>
+  </div>
+  <div class="reveal" id="reveal">
+    <div class="crown">&#9733; A escolhida da noite &#9733;</div>
+    <div class="reveal-poster" id="revealPoster"></div>
+    <h3 id="revealTitle"></h3>
+    <div class="meta" id="revealMeta"></div>
+    <div><span class="stream-pill" id="revealStream"></span></div>
+    <div class="reveal-actions">
+      <button class="btn-primary" id="revealOpen">Ver detalhes &amp; avaliar</button>
+      <button class="btn-sec" id="revealAgain">Sortear outro</button>
+      <button class="btn-sec" id="revealClose">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-top">
+      <div class="modal-poster" id="mPoster"></div>
+      <div class="modal-info">
+        <h2 id="mTitle"></h2>
+        <div class="orig" id="mOrig"></div>
+        <div class="tags" id="mTags"></div>
+        <div class="row" id="mDirector"></div>
+        <div class="row" id="mCast"></div>
+      </div>
+    </div>
+    <p class="synopsis" id="mSynopsis"></p>
+    <div class="modal-divider"></div>
+    <div class="review">
+      <h4>Sua avaliação</h4>
+      <div class="rate-row">
+        <div class="stars" id="mStars"></div>
+        <span class="rate-label" id="mRateLabel">Toque nas estrelas</span>
+      </div>
+      <textarea class="comment-box" id="mComment" placeholder="Anote o que achou — uma cena, um sentimento, uma nota pessoal..."></textarea>
+      <div class="review-actions">
+        <button class="toggle-seen" id="mSeen"><span class="dot"></span><span id="mSeenLabel">Marcar como visto</span></button>
+        <button class="btn-primary" id="mSave">Salvar</button>
+        <span class="save-note" id="mSaveNote">&#10003; Salvo neste navegador</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  CINEMORTAL · sorteador cinéfilo · seus dados ficam <span class="gold">apenas neste navegador</span> (localStorage)<br>
+  Catálogo curado de clássicos e obras essenciais — disponibilidade de streaming sujeita a alterações.
+</footer>
+
+<script>
+// Base de dados curada — filmes essenciais "ver antes de morrer".
+// Dados (ano, direção, elenco, gênero) verificados. Sinopses reescritas em texto próprio.
+// O campo "stream" é uma INDICAÇÃO de onde costuma estar disponível por assinatura e pode mudar.
+const STREAMERS = ["Apple TV+","Disney+","Globoplay","HBO Max","Netflix","Paramount+","Prime Video","+SBT","Mercado Play","Universal+"];
+
+const MOVIES = [
+{t:"O Poderoso Chefão",o:"The Godfather",y:1972,g:["Crime","Drama"],d:"Francis Ford Coppola",c:["Marlon Brando","Al Pacino","James Caan","Diane Keaton"],s:"A trajetória de uma poderosa família da máfia ítalo-americana e a transformação do filho mais relutante em um implacável chefe do crime.",st:"Paramount+"},
+{t:"Um Sonho de Liberdade",o:"The Shawshank Redemption",y:1994,g:["Drama"],d:"Frank Darabont",c:["Tim Robbins","Morgan Freeman"],s:"Condenado injustamente, um bancário forja uma amizade duradoura na prisão enquanto nutre, em silêncio, uma esperança inabalável de liberdade.",st:"HBO Max"},
+{t:"Pulp Fiction: Tempo de Violência",o:"Pulp Fiction",y:1994,g:["Crime","Drama"],d:"Quentin Tarantino",c:["John Travolta","Uma Thurman","Samuel L. Jackson","Bruce Willis"],s:"Histórias de gângsteres, um boxeador e um casal de assaltantes se entrelaçam em uma Los Angeles regada a diálogos afiados e violência inesperada.",st:"Netflix"},
+{t:"A Origem",o:"Inception",y:2010,g:["Ficção Científica","Ação","Suspense"],d:"Christopher Nolan",c:["Leonardo DiCaprio","Joseph Gordon-Levitt","Marion Cotillard","Tom Hardy"],s:"Um ladrão especializado em invadir sonhos recebe a tarefa quase impossível de plantar uma ideia na mente de um herdeiro.",st:"HBO Max"},
+{t:"Clube da Luta",o:"Fight Club",y:1999,g:["Drama","Suspense"],d:"David Fincher",c:["Brad Pitt","Edward Norton","Helena Bonham Carter"],s:"Um homem insone e um fabricante de sabonete carismático fundam um clube clandestino de luta que sai completamente do controle.",st:"Disney+"},
+{t:"Forrest Gump: O Contador de Histórias",o:"Forrest Gump",y:1994,g:["Drama","Romance"],d:"Robert Zemeckis",c:["Tom Hanks","Robin Wright","Gary Sinise"],s:"Um homem de coração simples e gentil atravessa décadas da história americana sem jamais perder o amor por sua amiga de infância.",st:"Paramount+"},
+{t:"Matrix",o:"The Matrix",y:1999,g:["Ficção Científica","Ação"],d:"Lana e Lilly Wachowski",c:["Keanu Reeves","Laurence Fishburne","Carrie-Anne Moss"],s:"Um programador descobre que a realidade é uma simulação e precisa escolher entre a ilusão confortável e a verdade brutal.",st:"HBO Max"},
+{t:"Os Bons Companheiros",o:"Goodfellas",y:1990,g:["Crime","Drama"],d:"Martin Scorsese",c:["Robert De Niro","Ray Liotta","Joe Pesci"],s:"A ascensão e a queda de um jovem fascinado pela vida na máfia, narrada com energia frenética ao longo de três décadas.",st:"Netflix"},
+{t:"O Senhor dos Anéis: A Sociedade do Anel",o:"The Lord of the Rings: The Fellowship of the Ring",y:2001,g:["Fantasia","Aventura"],d:"Peter Jackson",c:["Elijah Wood","Ian McKellen","Viggo Mortensen"],s:"Um jovem hobbit herda um anel de poder devastador e parte numa jornada para destruí-lo antes que o mal domine a Terra-média.",st:"HBO Max"},
+{t:"O Senhor dos Anéis: As Duas Torres",o:"The Lord of the Rings: The Two Towers",y:2002,g:["Fantasia","Aventura"],d:"Peter Jackson",c:["Elijah Wood","Ian McKellen","Viggo Mortensen"],s:"Enquanto a guerra se espalha pela Terra-média, a sociedade dividida resiste em frentes distintas contra um inimigo crescente.",st:"HBO Max"},
+{t:"O Senhor dos Anéis: O Retorno do Rei",o:"The Lord of the Rings: The Return of the King",y:2003,g:["Fantasia","Aventura"],d:"Peter Jackson",c:["Elijah Wood","Ian McKellen","Viggo Mortensen"],s:"A batalha final pela Terra-média se aproxima enquanto o portador do anel chega aos limites de suas forças.",st:"HBO Max"},
+{t:"Cidade de Deus",o:"Cidade de Deus",y:2002,g:["Crime","Drama"],d:"Fernando Meirelles",c:["Alexandre Rodrigues","Leandro Firmino","Phellipe Haagensen"],s:"Em uma favela carioca, dois meninos seguem destinos opostos enquanto o tráfico transforma a comunidade ao longo dos anos.",st:"Globoplay"},
+{t:"O Cavaleiro das Trevas",o:"The Dark Knight",y:2008,g:["Ação","Crime","Drama"],d:"Christopher Nolan",c:["Christian Bale","Heath Ledger","Aaron Eckhart"],s:"Batman enfrenta o Coringa, um criminoso anárquico que ameaça mergulhar Gotham no caos moral total.",st:"HBO Max"},
+{t:"Parasita",o:"Gisaengchung",y:2019,g:["Drama","Suspense"],d:"Bong Joon-ho",c:["Song Kang-ho","Lee Sun-kyun","Cho Yeo-jeong"],s:"Uma família pobre se infiltra astutamente na casa de uma família rica, até que segredos enterrados vêm à tona.",st:"HBO Max"},
+{t:"Os Sete Samurais",o:"Shichinin no Samurai",y:1954,g:["Ação","Drama","Aventura"],d:"Akira Kurosawa",c:["Toshiro Mifune","Takashi Shimura"],s:"Uma vila de camponeses contrata sete guerreiros sem mestre para defendê-la de bandidos que ameaçam a colheita.",st:"Apple TV+"},
+{t:"Cidadão Kane",o:"Citizen Kane",y:1941,g:["Drama","Mistério"],d:"Orson Welles",c:["Orson Welles","Joseph Cotten"],s:"A morte de um magnata da imprensa lança um repórter na busca pelo significado de sua última palavra.",st:"HBO Max"},
+{t:"Psicose",o:"Psycho",y:1960,g:["Terror","Suspense"],d:"Alfred Hitchcock",c:["Anthony Perkins","Janet Leigh"],s:"Uma secretária em fuga com dinheiro roubado para num motel isolado dirigido por um jovem perturbado e sua mãe.",st:"Universal+"},
+{t:"Era Uma Vez no Oeste",o:"C'era una volta il West",y:1968,g:["Faroeste","Drama"],d:"Sergio Leone",c:["Henry Fonda","Charles Bronson","Claudia Cardinale"],s:"Uma viúva, um pistoleiro misterioso e um bandido se cruzam em torno de terras valiosas no Velho Oeste.",st:"Paramount+"},
+{t:"Tudo em Todo Lugar ao Mesmo Tempo",o:"Everything Everywhere All at Once",y:2022,g:["Ficção Científica","Aventura","Comédia"],d:"Daniel Kwan e Daniel Scheinert",c:["Michelle Yeoh","Ke Huy Quan","Jamie Lee Curtis"],s:"Uma dona de lavanderia descobre que pode acessar versões paralelas de si mesma para salvar o multiverso.",st:"Prime Video"},
+{t:"Interestelar",o:"Interstellar",y:2014,g:["Ficção Científica","Drama","Aventura"],d:"Christopher Nolan",c:["Matthew McConaughey","Anne Hathaway","Jessica Chastain"],s:"Com a Terra à beira do colapso, um ex-piloto atravessa um buraco de minhoca em busca de um novo lar para a humanidade.",st:"Paramount+"},
+{t:"Bacurau",o:"Bacurau",y:2019,g:["Suspense","Faroeste","Drama"],d:"Kleber Mendonça Filho e Juliano Dornelles",c:["Sônia Braga","Udo Kier","Bárbara Colen"],s:"Um povoado no sertão brasileiro some do mapa e passa a ser caçado por forasteiros armados.",st:"Globoplay"},
+{t:"A Viagem de Chihiro",o:"Sen to Chihiro no Kamikakushi",y:2001,g:["Animação","Fantasia","Aventura"],d:"Hayao Miyazaki",c:["Rumi Hiiragi","Miyu Irino"],s:"Uma menina presa em um mundo de espíritos precisa trabalhar numa casa de banhos mágica para libertar seus pais.",st:"HBO Max"},
+{t:"O Labirinto do Fauno",o:"El Laberinto del Fauno",y:2006,g:["Fantasia","Drama","Guerra"],d:"Guillermo del Toro",c:["Ivana Baquero","Sergi López","Maribel Verdú"],s:"Durante o pós-guerra espanhol, uma menina escapa para um mundo fantástico cheio de criaturas perigosas e provas sombrias.",st:"HBO Max"},
+{t:"Coringa",o:"Joker",y:2019,g:["Crime","Drama","Suspense"],d:"Todd Phillips",c:["Joaquin Phoenix","Robert De Niro","Zazie Beetz"],s:"Um comediante fracassado e marginalizado mergulha gradualmente na loucura e se torna um símbolo do caos urbano.",st:"HBO Max"},
+{t:"Vingadores: Ultimato",o:"Avengers: Endgame",y:2019,g:["Ação","Aventura","Ficção Científica"],d:"Anthony e Joe Russo",c:["Robert Downey Jr.","Chris Evans","Scarlett Johansson"],s:"Os heróis sobreviventes se unem numa última tentativa de reverter a devastação causada por Thanos.",st:"Disney+"},
+{t:"O Rei Leão",o:"The Lion King",y:1994,g:["Animação","Aventura","Drama"],d:"Roger Allers e Rob Minkoff",c:["Matthew Broderick","Jeremy Irons","James Earl Jones"],s:"Um jovem leão exilado precisa amadurecer e enfrentar o tio usurpador para reclamar seu lugar como rei.",st:"Disney+"},
+{t:"De Volta para o Futuro",o:"Back to the Future",y:1985,g:["Ficção Científica","Aventura","Comédia"],d:"Robert Zemeckis",c:["Michael J. Fox","Christopher Lloyd","Lea Thompson"],s:"Um adolescente viaja acidentalmente para os anos 1950 e precisa garantir que seus pais se apaixonem.",st:"Universal+"},
+{t:"Os Caça-Fantasmas",o:"Ghostbusters",y:1984,g:["Comédia","Fantasia"],d:"Ivan Reitman",c:["Bill Murray","Dan Aykroyd","Sigourney Weaver"],s:"Cientistas excêntricos abrem um negócio de caça a fantasmas justo quando Nova York é invadida por forças sobrenaturais.",st:"Universal+"},
+{t:"Alien: O Oitavo Passageiro",o:"Alien",y:1979,g:["Terror","Ficção Científica"],d:"Ridley Scott",c:["Sigourney Weaver","Tom Skerritt","John Hurt"],s:"A tripulação de uma nave de carga é caçada, um a um, por uma criatura alienígena letal a bordo.",st:"Disney+"},
+{t:"O Iluminado",o:"The Shining",y:1980,g:["Terror","Suspense"],d:"Stanley Kubrick",c:["Jack Nicholson","Shelley Duvall","Danny Lloyd"],s:"Um escritor aceita cuidar de um hotel isolado no inverno e enlouquece sob influências sobrenaturais.",st:"HBO Max"},
+{t:"2001: Uma Odisseia no Espaço",o:"2001: A Space Odyssey",y:1968,g:["Ficção Científica","Aventura"],d:"Stanley Kubrick",c:["Keir Dullea","Gary Lockwood"],s:"Da aurora do homem ao futuro espacial, a humanidade confronta um misterioso monólito e uma inteligência artificial.",st:"HBO Max"},
+{t:"Taxi Driver",o:"Taxi Driver",y:1976,g:["Crime","Drama"],d:"Martin Scorsese",c:["Robert De Niro","Jodie Foster","Cybill Shepherd"],s:"Um taxista insone e solitário em Nova York deteriora mentalmente até decidir 'limpar' a cidade à sua maneira.",st:"Paramount+"},
+{t:"Tempos Modernos",o:"Modern Times",y:1936,g:["Comédia","Drama"],d:"Charles Chaplin",c:["Charles Chaplin","Paulette Goddard"],s:"O Vagabundo tenta sobreviver à industrialização desumana e à pobreza com humor e ternura.",st:"+SBT"},
+{t:"Cantando na Chuva",o:"Singin' in the Rain",y:1952,g:["Musical","Comédia","Romance"],d:"Gene Kelly e Stanley Donen",c:["Gene Kelly","Debbie Reynolds","Donald O'Connor"],s:"A chegada do cinema falado vira de cabeça para baixo a vida de astros do cinema mudo em Hollywood.",st:"HBO Max"},
+{t:"A Lista de Schindler",o:"Schindler's List",y:1993,g:["Drama","Guerra","Biografia"],d:"Steven Spielberg",c:["Liam Neeson","Ralph Fiennes","Ben Kingsley"],s:"Um empresário alemão salva mais de mil judeus empregando-os em sua fábrica durante o Holocausto.",st:"Universal+"},
+{t:"O Resgate do Soldado Ryan",o:"Saving Private Ryan",y:1998,g:["Guerra","Drama"],d:"Steven Spielberg",c:["Tom Hanks","Matt Damon","Tom Sizemore"],s:"Após o Dia D, um pelotão arrisca tudo para resgatar um único soldado em meio ao caos da guerra.",st:"Paramount+"},
+{t:"O Silêncio dos Inocentes",o:"The Silence of the Lambs",y:1991,g:["Crime","Suspense","Terror"],d:"Jonathan Demme",c:["Jodie Foster","Anthony Hopkins"],s:"Uma agente do FBI recorre a um brilhante psiquiatra canibal para capturar outro assassino em série.",st:"HBO Max"},
+{t:"Seven: Os Sete Crimes Capitais",o:"Se7en",y:1995,g:["Crime","Suspense","Mistério"],d:"David Fincher",c:["Brad Pitt","Morgan Freeman","Gwyneth Paltrow"],s:"Dois detetives caçam um assassino que comete crimes inspirados nos sete pecados capitais.",st:"HBO Max"},
+{t:"Os Suspeitos",o:"The Usual Suspects",y:1995,g:["Crime","Mistério","Suspense"],d:"Bryan Singer",c:["Kevin Spacey","Gabriel Byrne","Benicio del Toro"],s:"O único sobrevivente de um massacre conta a história de um criminoso lendário cuja existência ninguém comprova.",st:"Prime Video"},
+{t:"O Show de Truman",o:"The Truman Show",y:1998,g:["Drama","Comédia","Ficção Científica"],d:"Peter Weir",c:["Jim Carrey","Ed Harris","Laura Linney"],s:"Um homem comum descobre aos poucos que sua vida inteira é um reality show transmitido para o mundo.",st:"Paramount+"},
+{t:"Brilho Eterno de uma Mente Sem Lembranças",o:"Eternal Sunshine of the Spotless Mind",y:2004,g:["Ficção Científica","Romance","Drama"],d:"Michel Gondry",c:["Jim Carrey","Kate Winslet","Kirsten Dunst"],s:"Um casal apaga as lembranças um do outro, mas a memória do amor resiste mesmo durante o apagamento.",st:"HBO Max"},
+{t:"Cisne Negro",o:"Black Swan",y:2010,g:["Drama","Suspense","Terror"],d:"Darren Aronofsky",c:["Natalie Portman","Mila Kunis","Vincent Cassel"],s:"Uma bailarina perfeccionista mergulha em uma espiral psicológica ao buscar a perfeição no papel principal.",st:"Disney+"},
+{t:"Whiplash: Em Busca da Perfeição",o:"Whiplash",y:2014,g:["Drama","Musical"],d:"Damien Chazelle",c:["Miles Teller","J.K. Simmons"],s:"Um jovem baterista é levado ao limite por um professor implacável obcecado pela grandeza.",st:"Prime Video"},
+{t:"La La Land: Cantando Estações",o:"La La Land",y:2016,g:["Musical","Romance","Drama"],d:"Damien Chazelle",c:["Ryan Gosling","Emma Stone"],s:"Um pianista de jazz e uma aspirante a atriz se apaixonam enquanto perseguem sonhos que podem separá-los.",st:"Globoplay"},
+{t:"O Grande Hotel Budapeste",o:"The Grand Budapest Hotel",y:2014,g:["Comédia","Aventura"],d:"Wes Anderson",c:["Ralph Fiennes","Tony Revolori","Saoirse Ronan"],s:"Um lendário concierge e seu protegido se envolvem no roubo de uma pintura e numa disputa por herança.",st:"Disney+"},
+{t:"Bastardos Inglórios",o:"Inglourious Basterds",y:2009,g:["Guerra","Drama"],d:"Quentin Tarantino",c:["Brad Pitt","Christoph Waltz","Mélanie Laurent"],s:"Na França ocupada, um grupo de soldados judeus e uma dona de cinema tramam, separadamente, derrotar os nazistas.",st:"Netflix"},
+{t:"Django Livre",o:"Django Unchained",y:2012,g:["Faroeste","Drama"],d:"Quentin Tarantino",c:["Jamie Foxx","Christoph Waltz","Leonardo DiCaprio"],s:"Um escravo liberto e um caçador de recompensas atravessam o Sul para resgatar a esposa dele de um fazendeiro cruel.",st:"Netflix"},
+{t:"Os Infiltrados",o:"The Departed",y:2006,g:["Crime","Suspense","Drama"],d:"Martin Scorsese",c:["Leonardo DiCaprio","Matt Damon","Jack Nicholson"],s:"Um policial infiltrado na máfia e um mafioso infiltrado na polícia tentam desmascarar um ao outro.",st:"HBO Max"},
+{t:"O Lobo de Wall Street",o:"The Wolf of Wall Street",y:2013,g:["Crime","Comédia","Biografia"],d:"Martin Scorsese",c:["Leonardo DiCaprio","Jonah Hill","Margot Robbie"],s:"A ascensão e queda de um corretor que construiu uma fortuna por meio de fraude e excessos desenfreados.",st:"Paramount+"},
+{t:"Gladiador",o:"Gladiator",y:2000,g:["Ação","Drama","Aventura"],d:"Ridley Scott",c:["Russell Crowe","Joaquin Phoenix","Connie Nielsen"],s:"Um general romano traído é escravizado e luta como gladiador para vingar a morte de sua família.",st:"Paramount+"},
+{t:"Pena de Morte",o:"Dead Man Walking",y:1995,g:["Drama","Crime"],d:"Tim Robbins",c:["Susan Sarandon","Sean Penn"],s:"Uma freira acompanha um condenado à morte e confronta as fronteiras da culpa, perdão e justiça.",st:"Prime Video"},
+{t:"Ben-Hur",o:"Ben-Hur",y:1959,g:["Aventura","Drama","Épico"],d:"William Wyler",c:["Charlton Heston","Stephen Boyd"],s:"Um príncipe judeu traído por um amigo romano busca vingança e redenção na Judeia do tempo de Cristo.",st:"HBO Max"},
+{t:"E.T. O Extraterrestre",o:"E.T. the Extra-Terrestrial",y:1982,g:["Ficção Científica","Aventura","Família"],d:"Steven Spielberg",c:["Henry Thomas","Drew Barrymore"],s:"Um garoto solitário esconde e protege um alienígena perdido que só deseja voltar para casa.",st:"Universal+"},
+{t:"Tubarão",o:"Jaws",y:1975,g:["Suspense","Aventura","Terror"],d:"Steven Spielberg",c:["Roy Scheider","Richard Dreyfuss","Robert Shaw"],s:"Uma cidade litorânea é aterrorizada por um tubarão gigante, e três homens partem para caçá-lo.",st:"Universal+"},
+{t:"Indiana Jones e os Caçadores da Arca Perdida",o:"Raiders of the Lost Ark",y:1981,g:["Aventura","Ação"],d:"Steven Spielberg",c:["Harrison Ford","Karen Allen"],s:"Um arqueólogo aventureiro corre contra os nazistas para encontrar a Arca da Aliança.",st:"Paramount+"},
+{t:"Jurassic Park: O Parque dos Dinossauros",o:"Jurassic Park",y:1993,g:["Aventura","Ficção Científica"],d:"Steven Spielberg",c:["Sam Neill","Laura Dern","Jeff Goldblum"],s:"Um parque temático com dinossauros clonados se torna mortal quando os sistemas de segurança falham.",st:"Universal+"},
+{t:"Star Wars: Uma Nova Esperança",o:"Star Wars",y:1977,g:["Ficção Científica","Aventura","Fantasia"],d:"George Lucas",c:["Mark Hamill","Harrison Ford","Carrie Fisher"],s:"Um jovem fazendeiro se une a rebeldes para derrubar um império galáctico e resgatar uma princesa.",st:"Disney+"},
+{t:"Star Wars: O Império Contra-Ataca",o:"The Empire Strikes Back",y:1980,g:["Ficção Científica","Aventura","Fantasia"],d:"Irvin Kershner",c:["Mark Hamill","Harrison Ford","Carrie Fisher"],s:"Os rebeldes recuam diante do Império enquanto o herói descobre uma verdade devastadora sobre sua origem.",st:"Disney+"},
+{t:"O Exterminador do Futuro 2: O Julgamento Final",o:"Terminator 2: Judgment Day",y:1991,g:["Ação","Ficção Científica"],d:"James Cameron",c:["Arnold Schwarzenegger","Linda Hamilton","Edward Furlong"],s:"Um ciborgue reprogramado protege um garoto destinado a liderar a humanidade contra as máquinas.",st:"HBO Max"},
+{t:"Titanic",o:"Titanic",y:1997,g:["Romance","Drama"],d:"James Cameron",c:["Leonardo DiCaprio","Kate Winslet","Billy Zane"],s:"Um romance proibido floresce a bordo do navio condenado em sua trágica viagem inaugural.",st:"Paramount+"},
+{t:"Avatar",o:"Avatar",y:2009,g:["Ficção Científica","Aventura","Ação"],d:"James Cameron",c:["Sam Worthington","Zoe Saldaña","Sigourney Weaver"],s:"Um fuzileiro paraplégico assume um corpo alienígena e se vê dividido entre a missão e um povo nativo.",st:"Disney+"},
+{t:"Mad Max: Estrada da Fúria",o:"Mad Max: Fury Road",y:2015,g:["Ação","Aventura","Ficção Científica"],d:"George Miller",c:["Tom Hardy","Charlize Theron","Nicholas Hoult"],s:"Em um deserto pós-apocalíptico, uma rebelde e um andarilho fogem de um tirano numa perseguição alucinante.",st:"HBO Max"},
+{t:"Blade Runner: O Caçador de Androides",o:"Blade Runner",y:1982,g:["Ficção Científica","Suspense"],d:"Ridley Scott",c:["Harrison Ford","Rutger Hauer","Sean Young"],s:"Um caçador de replicantes persegue androides fugitivos e questiona o que significa ser humano.",st:"HBO Max"},
+{t:"Blade Runner 2049",o:"Blade Runner 2049",y:2017,g:["Ficção Científica","Suspense","Drama"],d:"Denis Villeneuve",c:["Ryan Gosling","Harrison Ford","Ana de Armas"],s:"Um novo caçador de replicantes descobre um segredo capaz de abalar o que resta da ordem social.",st:"HBO Max"},
+{t:"A Chegada",o:"Arrival",y:2016,g:["Ficção Científica","Drama","Mistério"],d:"Denis Villeneuve",c:["Amy Adams","Jeremy Renner","Forest Whitaker"],s:"Uma linguista tenta se comunicar com alienígenas recém-chegados antes que o medo leve o mundo à guerra.",st:"Paramount+"},
+{t:"Duna",o:"Dune",y:2021,g:["Ficção Científica","Aventura"],d:"Denis Villeneuve",c:["Timothée Chalamet","Rebecca Ferguson","Oscar Isaac"],s:"O herdeiro de uma casa nobre é jogado em uma disputa mortal por controle do planeta-deserto mais valioso do universo.",st:"HBO Max"},
+{t:"Os Excluídos",o:"The Holdovers",y:2023,g:["Comédia","Drama"],d:"Alexander Payne",c:["Paul Giamatti","Da'Vine Joy Randolph","Dominic Sessa"],s:"Um professor rabugento, um aluno problemático e uma cozinheira enlutada passam juntos as festas num internato vazio.",st:"Universal+"},
+{t:"Oppenheimer",o:"Oppenheimer",y:2023,g:["Biografia","Drama","História"],d:"Christopher Nolan",c:["Cillian Murphy","Emily Blunt","Robert Downey Jr."],s:"A trajetória do físico que liderou a criação da bomba atômica e enfrentou as consequências morais de sua obra.",st:"Universal+"},
+{t:"Barbie",o:"Barbie",y:2023,g:["Comédia","Fantasia","Aventura"],d:"Greta Gerwig",c:["Margot Robbie","Ryan Gosling","America Ferrera"],s:"Uma boneca deixa seu mundo perfeito rumo ao mundo real e confronta perguntas inesperadas sobre identidade.",st:"HBO Max"},
+{t:"Pobres Criaturas",o:"Poor Things",y:2023,g:["Ficção Científica","Comédia","Romance"],d:"Yorgos Lanthimos",c:["Emma Stone","Mark Ruffalo","Willem Dafoe"],s:"Reanimada por um cientista excêntrico, uma jovem parte numa jornada de descoberta sobre o mundo e sobre si.",st:"Disney+"},
+{t:"Anatomia de uma Queda",o:"Anatomie d'une chute",y:2023,g:["Drama","Suspense","Mistério"],d:"Justine Triet",c:["Sandra Hüller","Swann Arlaud"],s:"Uma escritora é julgada pela morte do marido enquanto o filho cego é a testemunha decisiva.",st:"Prime Video"},
+{t:"Aftersun",o:"Aftersun",y:2022,g:["Drama"],d:"Charlotte Wells",c:["Paul Mescal","Frankie Corio"],s:"Uma mulher revisita as memórias de umas férias com o pai e tenta reconstruir quem ele realmente era.",st:"HBO Max"},
+{t:"Soul",o:"Soul",y:2020,g:["Animação","Aventura","Fantasia"],d:"Pete Docter",c:["Jamie Foxx","Tina Fey"],s:"Um professor de música morre no dia da grande chance e parte numa jornada para reencontrar o sentido da vida.",st:"Disney+"},
+{t:"Divertida Mente",o:"Inside Out",y:2015,g:["Animação","Aventura","Comédia"],d:"Pete Docter",c:["Amy Poehler","Phyllis Smith","Bill Hader"],s:"As emoções dentro da cabeça de uma menina entram em conflito quando ela precisa lidar com uma grande mudança.",st:"Disney+"},
+{t:"Up: Altas Aventuras",o:"Up",y:2009,g:["Animação","Aventura","Família"],d:"Pete Docter",c:["Edward Asner","Jordan Nagai"],s:"Um idoso amarra balões em sua casa e parte para a América do Sul, levando junto um escoteiro inesperado.",st:"Disney+"},
+{t:"Wall·E",o:"WALL-E",y:2008,g:["Animação","Ficção Científica","Aventura"],d:"Andrew Stanton",c:["Ben Burtt","Elissa Knight"],s:"Um robô solitário deixado para limpar a Terra encontra amor e propósito ao seguir uma sonda exploradora.",st:"Disney+"},
+{t:"Ratatouille",o:"Ratatouille",y:2007,g:["Animação","Comédia","Família"],d:"Brad Bird",c:["Patton Oswalt","Lou Romano"],s:"Um rato com paladar refinado se alia a um jovem cozinheiro para realizar o sonho de comandar uma cozinha de Paris.",st:"Disney+"},
+{t:"Toy Story",o:"Toy Story",y:1995,g:["Animação","Aventura","Comédia"],d:"John Lasseter",c:["Tom Hanks","Tim Allen"],s:"Um cowboy de brinquedo tem o posto de favorito ameaçado pela chegada de um espacial moderno e cheio de gadgets.",st:"Disney+"},
+{t:"Procurando Nemo",o:"Finding Nemo",y:2003,g:["Animação","Aventura","Família"],d:"Andrew Stanton",c:["Albert Brooks","Ellen DeGeneres"],s:"Um peixe-palhaço atravessa o oceano para resgatar o filho capturado, ajudado por uma companheira esquecida.",st:"Disney+"},
+{t:"Meu Amigo Totoro",o:"Tonari no Totoro",y:1988,g:["Animação","Fantasia","Família"],d:"Hayao Miyazaki",c:["Noriko Hidaka","Chika Sakamoto"],s:"Duas irmãs que se mudam para o campo fazem amizade com espíritos gentis da floresta.",st:"HBO Max"},
+{t:"A Princesa Mononoke",o:"Mononoke-hime",y:1997,g:["Animação","Fantasia","Aventura"],d:"Hayao Miyazaki",c:["Yoji Matsuda","Yuriko Ishida"],s:"Um jovem guerreiro se vê no meio do conflito entre os deuses da floresta e os humanos que a destroem.",st:"HBO Max"},
+{t:"O Castelo Animado",o:"Hauru no Ugoku Shiro",y:2004,g:["Animação","Fantasia","Romance"],d:"Hayao Miyazaki",c:["Chieko Baisho","Takuya Kimura"],s:"Uma jovem amaldiçoada com a velhice busca refúgio no castelo ambulante de um mago misterioso.",st:"HBO Max"},
+{t:"O Túmulo dos Vagalumes",o:"Hotaru no Haka",y:1988,g:["Animação","Drama","Guerra"],d:"Isao Takahata",c:["Tsutomu Tatsumi","Ayano Shiraishi"],s:"Dois irmãos lutam para sobreviver no Japão devastado pelos últimos meses da Segunda Guerra.",st:"Prime Video"},
+{t:"Cidade dos Sonhos",o:"Mulholland Drive",y:2001,g:["Mistério","Suspense","Drama"],d:"David Lynch",c:["Naomi Watts","Laura Harring"],s:"Uma aspirante a atriz e uma mulher amnésica mergulham num enigma onírico nos bastidores de Hollywood.",st:"HBO Max"},
+{t:"Veludo Azul",o:"Blue Velvet",y:1986,g:["Mistério","Suspense","Drama"],d:"David Lynch",c:["Kyle MacLachlan","Isabella Rossellini","Dennis Hopper"],s:"Um jovem descobre uma orelha decepada e se enreda no submundo perturbador de sua cidade pacata.",st:"HBO Max"},
+{t:"Os 400 Golpes",o:"Les Quatre Cents Coups",y:1959,g:["Drama"],d:"François Truffaut",c:["Jean-Pierre Léaud"],s:"Um garoto incompreendido por pais e escola escorrega para a delinquência em busca de liberdade.",st:"HBO Max"},
+{t:"Acossado",o:"À Bout de Souffle",y:1960,g:["Crime","Drama","Romance"],d:"Jean-Luc Godard",c:["Jean-Paul Belmondo","Jean Seberg"],s:"Um pequeno criminoso fascinado pelo cinema americano vive um romance instável enquanto foge da polícia.",st:"HBO Max"},
+{t:"8½",o:"Otto e mezzo",y:1963,g:["Drama"],d:"Federico Fellini",c:["Marcello Mastroianni","Anouk Aimée"],s:"Um cineasta em crise criativa confunde memórias, fantasias e a realidade enquanto adia seu novo filme.",st:"HBO Max"},
+{t:"A Doce Vida",o:"La Dolce Vita",y:1960,g:["Drama","Comédia"],d:"Federico Fellini",c:["Marcello Mastroianni","Anita Ekberg"],s:"Um jornalista vagueia pela Roma noturna em busca de prazer e sentido em meio ao vazio da fama.",st:"HBO Max"},
+{t:"Ladrões de Bicicleta",o:"Ladri di biciclette",y:1948,g:["Drama"],d:"Vittorio De Sica",c:["Lamberto Maggiorani","Enzo Staiola"],s:"Um homem pobre e o filho percorrem Roma atrás da bicicleta roubada da qual depende seu sustento.",st:"HBO Max"},
+{t:"O Sétimo Selo",o:"Det Sjunde Inseglet",y:1957,g:["Drama","Fantasia"],d:"Ingmar Bergman",c:["Max von Sydow","Bengt Ekerot"],s:"Um cavaleiro de volta das cruzadas desafia a Morte para um jogo de xadrez enquanto a peste assola a terra.",st:"HBO Max"},
+{t:"Rashomon",o:"Rashomon",y:1950,g:["Crime","Drama","Mistério"],d:"Akira Kurosawa",c:["Toshiro Mifune","Machiko Kyo"],s:"Quatro testemunhas contam versões contraditórias de um mesmo crime, expondo a fragilidade da verdade.",st:"Apple TV+"},
+{t:"Ran",o:"Ran",y:1985,g:["Drama","Guerra","Épico"],d:"Akira Kurosawa",c:["Tatsuya Nakadai"],s:"Um senhor feudal divide seu reino entre os filhos e desencadeia uma tragédia de traição e ruína.",st:"HBO Max"},
+{t:"Stalker",o:"Stalker",y:1979,g:["Ficção Científica","Drama"],d:"Andrei Tarkovsky",c:["Alexander Kaidanovsky","Anatoly Solonitsyn"],s:"Um guia conduz dois homens por uma zona misteriosa rumo a uma sala que realiza o desejo mais profundo.",st:"HBO Max"},
+{t:"Persona",o:"Persona",y:1966,g:["Drama","Suspense"],d:"Ingmar Bergman",c:["Bibi Andersson","Liv Ullmann"],s:"Uma atriz que parou de falar e a enfermeira que a cuida começam a fundir suas identidades.",st:"HBO Max"},
+{t:"Aguirre, a Cólera dos Deuses",o:"Aguirre, der Zorn Gottes",y:1972,g:["Aventura","Drama","História"],d:"Werner Herzog",c:["Klaus Kinski"],s:"Um conquistador espanhol enlouquece de ambição numa expedição amazônica em busca do El Dorado.",st:"HBO Max"},
+{t:"O Espelho",o:"Zerkalo",y:1975,g:["Drama"],d:"Andrei Tarkovsky",c:["Margarita Terekhova"],s:"Um homem à beira da morte revisita memórias fragmentadas da infância, da mãe e da história de seu país.",st:"HBO Max"},
+{t:"Central do Brasil",o:"Central do Brasil",y:1998,g:["Drama"],d:"Walter Salles",c:["Fernanda Montenegro","Vinícius de Oliveira"],s:"Uma ex-professora amarga e um menino órfão atravessam o Brasil em busca do pai que ele nunca conheceu.",st:"Globoplay"},
+{t:"Tropa de Elite",o:"Tropa de Elite",y:2007,g:["Ação","Crime","Drama"],d:"José Padilha",c:["Wagner Moura","Caio Junqueira","André Ramiro"],s:"Um capitão do BOPE busca um substituto enquanto enfrenta o tráfico e a corrupção no Rio.",st:"Globoplay"},
+{t:"Que Horas Ela Volta?",o:"Que Horas Ela Volta?",y:2015,g:["Drama"],d:"Anna Muylaert",c:["Regina Casé","Camila Márdila","Michel Joelsas"],s:"Uma empregada doméstica vê as fronteiras invisíveis da casa onde trabalha ruírem com a chegada de sua filha.",st:"Globoplay"},
+{t:"Auto da Compadecida",o:"O Auto da Compadecida",y:2000,g:["Comédia","Aventura"],d:"Guel Arraes",c:["Matheus Nachtergaele","Selton Mello","Fernanda Montenegro"],s:"Dois espertalhões nordestinos aprontam trapaças até serem levados a um julgamento divino.",st:"Globoplay"},
+{t:"Ainda Estou Aqui",o:"Ainda Estou Aqui",y:2024,g:["Drama","Biografia","História"],d:"Walter Salles",c:["Fernanda Torres","Selton Mello","Fernanda Montenegro"],s:"Uma mãe reconstrói a família após o desaparecimento do marido durante a ditadura militar brasileira.",st:"Globoplay"},
+{t:"O Pianista",o:"The Pianist",y:2002,g:["Drama","Guerra","Biografia"],d:"Roman Polanski",c:["Adrien Brody","Thomas Kretschmann"],s:"Um pianista judeu polonês luta para sobreviver à ocupação nazista de Varsóvia.",st:"Prime Video"},
+{t:"A Vida É Bela",o:"La vita è bella",y:1997,g:["Drama","Comédia","Romance"],d:"Roberto Benigni",c:["Roberto Benigni","Nicoletta Braschi"],s:"Para proteger o filho num campo de concentração, um pai transforma o horror em um jogo cheio de imaginação.",st:"Prime Video"},
+{t:"O Tigre e o Dragão",o:"Wo Hu Cang Long",y:2000,g:["Ação","Aventura","Romance"],d:"Ang Lee",c:["Chow Yun-fat","Michelle Yeoh","Zhang Ziyi"],s:"Mestres das artes marciais perseguem uma espada lendária e confrontam paixões proibidas na China antiga.",st:"Universal+"},
+{t:"O Segredo de Brokeback Mountain",o:"Brokeback Mountain",y:2005,g:["Drama","Romance"],d:"Ang Lee",c:["Heath Ledger","Jake Gyllenhaal","Michelle Williams"],s:"Dois vaqueiros vivem um amor secreto que atravessa décadas em meio à repressão de sua época.",st:"Universal+"},
+{t:"Moonlight: Sob a Luz do Luar",o:"Moonlight",y:2016,g:["Drama"],d:"Barry Jenkins",c:["Mahershala Ali","Naomie Harris","Trevante Rhodes"],s:"Em três fases da vida, um homem negro tenta entender quem é em meio à pobreza e à descoberta de sua identidade.",st:"Globoplay"},
+{t:"Nomadland: Sobreviver na América",o:"Nomadland",y:2020,g:["Drama"],d:"Chloé Zhao",c:["Frances McDormand","David Strathairn"],s:"Após perder tudo, uma mulher percorre o oeste americano vivendo em sua van e encontrando outros nômades.",st:"Disney+"},
+{t:"Three Billboards: Os Anúncios do Crime",o:"Three Billboards Outside Ebbing, Missouri",y:2017,g:["Crime","Drama","Comédia"],d:"Martin McDonagh",c:["Frances McDormand","Woody Harrelson","Sam Rockwell"],s:"Uma mãe enlutada provoca a polícia local com outdoors acusatórios sobre o assassinato não resolvido da filha.",st:"Disney+"},
+{t:"Fargo",o:"Fargo",y:1996,g:["Crime","Drama","Comédia"],d:"Joel e Ethan Coen",c:["Frances McDormand","William H. Macy","Steve Buscemi"],s:"Um sequestro forjado dá terrivelmente errado e uma delegada grávida desenrola o caso na neve de Minnesota.",st:"Disney+"},
+{t:"Onde os Fracos Não Têm Vez",o:"No Country for Old Men",y:2007,g:["Crime","Suspense","Drama"],d:"Joel e Ethan Coen",c:["Javier Bardem","Tommy Lee Jones","Josh Brolin"],s:"Um homem que encontra dinheiro de um tráfico é caçado por um assassino implacável e imprevisível.",st:"Disney+"},
+{t:"Sangue Negro",o:"There Will Be Blood",y:2007,g:["Drama","História"],d:"Paul Thomas Anderson",c:["Daniel Day-Lewis","Paul Dano"],s:"Um prospector de petróleo constrói um império à custa da própria humanidade no início do século XX.",st:"Disney+"},
+{t:"Magnólia",o:"Magnolia",y:1999,g:["Drama"],d:"Paul Thomas Anderson",c:["Tom Cruise","Julianne Moore","Philip Seymour Hoffman"],s:"Vidas dispersas em Los Angeles se cruzam num único dia marcado por arrependimento, acaso e redenção.",st:"Disney+"},
+{t:"Boogie Nights: Prazer Sem Limites",o:"Boogie Nights",y:1997,g:["Drama"],d:"Paul Thomas Anderson",c:["Mark Wahlberg","Julianne Moore","Burt Reynolds"],s:"Um jovem entra na indústria pornô dos anos 1970 e vive ascensão e queda meteóricas.",st:"Disney+"},
+{t:"Trainspotting: Sem Limites",o:"Trainspotting",y:1996,g:["Drama","Crime"],d:"Danny Boyle",c:["Ewan McGregor","Ewen Bremner","Jonny Lee Miller"],s:"Um grupo de jovens viciados em heroína na Escócia tenta, à sua maneira caótica, escapar do vício.",st:"Paramount+"},
+{t:"Quem Quer Ser um Milionário?",o:"Slumdog Millionaire",y:2008,g:["Drama","Romance"],d:"Danny Boyle",c:["Dev Patel","Freida Pinto"],s:"Um jovem das favelas de Mumbai recorda momentos de sua vida que explicam suas respostas num programa de TV.",st:"Disney+"},
+{t:"Cães de Aluguel",o:"Reservoir Dogs",y:1992,g:["Crime","Suspense"],d:"Quentin Tarantino",c:["Harvey Keitel","Tim Roth","Michael Madsen"],s:"Após um assalto que dá errado, ladrões desconfiados tentam descobrir qual deles é o informante.",st:"Disney+"},
+{t:"Fogo Contra Fogo",o:"Heat",y:1995,g:["Crime","Ação","Drama"],d:"Michael Mann",c:["Al Pacino","Robert De Niro","Val Kilmer"],s:"Um detetive obstinado e um ladrão profissional travam um duelo de respeito mútuo em Los Angeles.",st:"HBO Max"},
+{t:"Scarface",o:"Scarface",y:1983,g:["Crime","Drama"],d:"Brian De Palma",c:["Al Pacino","Michelle Pfeiffer","Steven Bauer"],s:"Um imigrante cubano sobe ao topo do tráfico de drogas em Miami e é consumido pela própria ambição.",st:"Universal+"},
+{t:"Apocalypse Now",o:"Apocalypse Now",y:1979,g:["Guerra","Drama"],d:"Francis Ford Coppola",c:["Martin Sheen","Marlon Brando","Robert Duvall"],s:"Um capitão sobe um rio na guerra do Vietnã para encontrar e eliminar um coronel que enlouqueceu.",st:"Disney+"},
+{t:"O Poderoso Chefão II",o:"The Godfather Part II",y:1974,g:["Crime","Drama"],d:"Francis Ford Coppola",c:["Al Pacino","Robert De Niro","Robert Duvall"],s:"A consolidação do império de um chefe da máfia é contraposta à juventude de seu pai imigrante.",st:"Paramount+"},
+{t:"Touro Indomável",o:"Raging Bull",y:1980,g:["Drama","Biografia","Esporte"],d:"Martin Scorsese",c:["Robert De Niro","Joe Pesci","Cathy Moriarty"],s:"A vida de um boxeador cuja fúria dentro e fora do ringue destrói tudo ao seu redor.",st:"Disney+"},
+{t:"Era Uma Vez na América",o:"Once Upon a Time in America",y:1984,g:["Crime","Drama"],d:"Sergio Leone",c:["Robert De Niro","James Woods","Elizabeth McGovern"],s:"Um gângster relembra décadas de amizade, amor e traição no submundo judeu de Nova York.",st:"HBO Max"},
+{t:"Vertigo: Um Corpo que Cai",o:"Vertigo",y:1958,g:["Mistério","Suspense","Romance"],d:"Alfred Hitchcock",c:["James Stewart","Kim Novak"],s:"Um detetive com medo de altura se obceca por uma mulher misteriosa que parece estar sendo perseguida.",st:"Universal+"},
+{t:"Janela Indiscreta",o:"Rear Window",y:1954,g:["Mistério","Suspense"],d:"Alfred Hitchcock",c:["James Stewart","Grace Kelly"],s:"Um fotógrafo de perna engessada passa a espionar os vizinhos e suspeita ter testemunhado um crime.",st:"Universal+"},
+{t:"Casablanca",o:"Casablanca",y:1942,g:["Romance","Drama","Guerra"],d:"Michael Curtiz",c:["Humphrey Bogart","Ingrid Bergman"],s:"Em meio à guerra, um dono de bar reencontra um antigo amor e precisa escolher entre o coração e o dever.",st:"HBO Max"},
+{t:"E o Vento Levou",o:"Gone with the Wind",y:1939,g:["Drama","Romance","Guerra"],d:"Victor Fleming",c:["Clark Gable","Vivien Leigh"],s:"Uma jovem do Sul atravessa a Guerra Civil americana lutando para preservar terra, status e um amor turbulento.",st:"HBO Max"},
+{t:"O Mágico de Oz",o:"The Wizard of Oz",y:1939,g:["Fantasia","Aventura","Musical"],d:"Victor Fleming",c:["Judy Garland","Frank Morgan"],s:"Uma garota levada por um tornado a uma terra mágica busca o caminho de volta para casa com novos amigos.",st:"+SBT"},
+{t:"Sindicato de Ladrões",o:"On the Waterfront",y:1954,g:["Crime","Drama"],d:"Elia Kazan",c:["Marlon Brando","Eva Marie Saint"],s:"Um ex-boxeador estivador confronta a corrupção do sindicato que controla os portos.",st:"Paramount+"},
+{t:"Doze Homens e uma Sentença",o:"12 Angry Men",y:1957,g:["Drama","Crime"],d:"Sidney Lumet",c:["Henry Fonda","Lee J. Cobb"],s:"Um único jurado tenta convencer os outros onze a reconsiderar um veredito aparentemente óbvio.",st:"HBO Max"},
+{t:"Rede de Intrigas",o:"Network",y:1976,g:["Drama"],d:"Sidney Lumet",c:["Faye Dunaway","William Holden","Peter Finch"],s:"Uma emissora explora o colapso ao vivo de um âncora para alavancar a audiência a qualquer custo.",st:"HBO Max"},
+{t:"Chinatown",o:"Chinatown",y:1974,g:["Mistério","Crime","Drama"],d:"Roman Polanski",c:["Jack Nicholson","Faye Dunaway"],s:"Um detetive particular investiga um caso de adultério e tropeça numa conspiração sobre água e poder em Los Angeles.",st:"Paramount+"},
+{t:"Um Estranho no Ninho",o:"One Flew Over the Cuckoo's Nest",y:1975,g:["Drama"],d:"Milos Forman",c:["Jack Nicholson","Louise Fletcher"],s:"Um detento finge loucura para fugir do trabalho forçado e provoca uma rebelião num hospital psiquiátrico.",st:"HBO Max"},
+{t:"Amadeus",o:"Amadeus",y:1984,g:["Drama","Biografia","Música"],d:"Milos Forman",c:["F. Murray Abraham","Tom Hulce"],s:"Um compositor da corte é corroído pela inveja diante do gênio irreverente de Mozart.",st:"HBO Max"},
+{t:"Laranja Mecânica",o:"A Clockwork Orange",y:1971,g:["Crime","Ficção Científica","Drama"],d:"Stanley Kubrick",c:["Malcolm McDowell"],s:"Um jovem delinquente ultraviolento é submetido a um tratamento estatal que questiona o livre-arbítrio.",st:"HBO Max"},
+{t:"O Exorcista",o:"The Exorcist",y:1973,g:["Terror"],d:"William Friedkin",c:["Ellen Burstyn","Linda Blair","Max von Sydow"],s:"Uma mãe recorre a dois padres quando a filha apresenta sinais de uma possessão demoníaca.",st:"HBO Max"},
+{t:"O Bebê de Rosemary",o:"Rosemary's Baby",y:1968,g:["Terror","Suspense"],d:"Roman Polanski",c:["Mia Farrow","John Cassavetes"],s:"Uma jovem grávida desconfia que os vizinhos e o marido tramam algo sinistro com seu bebê.",st:"Paramount+"},
+{t:"Corra!",o:"Get Out",y:2017,g:["Terror","Suspense","Mistério"],d:"Jordan Peele",c:["Daniel Kaluuya","Allison Williams"],s:"Um rapaz negro visita a família branca da namorada e descobre um segredo aterrorizante.",st:"Universal+"},
+{t:"Hereditário",o:"Hereditary",y:2018,g:["Terror","Drama","Mistério"],d:"Ari Aster",c:["Toni Collette","Alex Wolff","Gabriel Byrne"],s:"Após a morte da matriarca, uma família é assombrada por um legado sombrio e cada vez mais sinistro.",st:"Prime Video"},
+{t:"A Bruxa",o:"The Witch",y:2015,g:["Terror","Drama","Mistério"],d:"Robert Eggers",c:["Anya Taylor-Joy","Ralph Ineson"],s:"Uma família puritana isolada na floresta se desfaz sob a suspeita de bruxaria após o sumiço de um bebê.",st:"Prime Video"},
+{t:"Pacto de Sangue",o:"Double Indemnity",y:1944,g:["Crime","Drama","Mistério"],d:"Billy Wilder",c:["Fred MacMurray","Barbara Stanwyck"],s:"Um corretor de seguros e uma mulher fatal tramam um assassinato perfeito que começa a desmoronar.",st:"Universal+"},
+{t:"Crepúsculo dos Deuses",o:"Sunset Boulevard",y:1950,g:["Drama","Mistério"],d:"Billy Wilder",c:["Gloria Swanson","William Holden"],s:"Um roteirista falido se enreda na fantasia de uma estrela esquecida do cinema mudo.",st:"Universal+"},
+{t:"Quanto Mais Quente Melhor",o:"Some Like It Hot",y:1959,g:["Comédia","Romance"],d:"Billy Wilder",c:["Marilyn Monroe","Tony Curtis","Jack Lemmon"],s:"Dois músicos testemunham um crime e se disfarçam de mulheres para fugir da máfia.",st:"HBO Max"},
+{t:"Cinema Paradiso",o:"Nuovo Cinema Paradiso",y:1988,g:["Drama","Romance"],d:"Giuseppe Tornatore",c:["Philippe Noiret","Salvatore Cascio"],s:"Um cineasta relembra a amizade da infância com o projecionista do cinema de sua aldeia.",st:"HBO Max"},
+{t:"O Fabuloso Destino de Amélie Poulain",o:"Le Fabuleux Destin d'Amélie Poulain",y:2001,g:["Comédia","Romance"],d:"Jean-Pierre Jeunet",c:["Audrey Tautou","Mathieu Kassovitz"],s:"Uma jovem tímida de Paris decide secretamente espalhar pequenas felicidades pela vida das pessoas.",st:"HBO Max"},
+{t:"Relatos Selvagens",o:"Relatos Salvajes",y:2014,g:["Comédia","Drama"],d:"Damián Szifron",c:["Ricardo Darín","Óscar Martínez"],s:"Seis histórias independentes exploram, com humor ácido, o que acontece quando as pessoas perdem o controle.",st:"Netflix"},
+{t:"O Segredo dos Seus Olhos",o:"El Secreto de Sus Ojos",y:2009,g:["Mistério","Crime","Romance"],d:"Juan José Campanella",c:["Ricardo Darín","Soledad Villamil"],s:"Um agente judicial aposentado reabre um caso de assassinato que nunca conseguiu esquecer.",st:"HBO Max"},
+{t:"Roma",o:"Roma",y:2018,g:["Drama"],d:"Alfonso Cuarón",c:["Yalitza Aparicio","Marina de Tavira"],s:"O cotidiano de uma empregada doméstica revela as tensões de uma família e de um país nos anos 1970.",st:"Netflix"},
+{t:"E Sua Mãe Também",o:"Y Tu Mamá También",y:2001,g:["Drama","Romance"],d:"Alfonso Cuarón",c:["Gael García Bernal","Diego Luna","Maribel Verdú"],s:"Dois amigos e uma mulher mais velha partem numa viagem que transforma suas vidas e amizades.",st:"HBO Max"},
+{t:"Amores Brutos",o:"Amores Perros",y:2000,g:["Drama","Crime"],d:"Alejandro González Iñárritu",c:["Gael García Bernal","Emilio Echevarría"],s:"Um acidente de carro entrelaça três histórias de amor, perda e violência na Cidade do México.",st:"HBO Max"},
+{t:"Birdman ou (A Inesperada Virtude da Ignorância)",o:"Birdman",y:2014,g:["Drama","Comédia"],d:"Alejandro González Iñárritu",c:["Michael Keaton","Edward Norton","Emma Stone"],s:"Um ator famoso por viver um super-herói tenta se reinventar na Broadway enquanto sua sanidade vacila.",st:"Disney+"},
+{t:"O Regresso",o:"The Revenant",y:2015,g:["Aventura","Drama","Faroeste"],d:"Alejandro González Iñárritu",c:["Leonardo DiCaprio","Tom Hardy"],s:"Deixado para morrer após um ataque de urso, um explorador atravessa a natureza selvagem em busca de vingança.",st:"Disney+"},
+{t:"Spider-Man: Através do Aranhaverso",o:"Spider-Man: Across the Spider-Verse",y:2023,g:["Animação","Ação","Aventura"],d:"Joaquim Dos Santos",c:["Shameik Moore","Hailee Steinfeld"],s:"Miles Morales viaja pelo multiverso e confronta uma sociedade de Aranhas com visões opostas sobre o destino.",st:"Netflix"},
+{t:"Homem-Aranha no Aranhaverso",o:"Spider-Man: Into the Spider-Verse",y:2018,g:["Animação","Ação","Aventura"],d:"Bob Persichetti",c:["Shameik Moore","Jake Johnson"],s:"Um adolescente do Brooklyn vira o Homem-Aranha e se une a versões alternativas do herói de outras dimensões.",st:"Netflix"},
+{t:"Mogli: O Menino Lobo",o:"The Jungle Book",y:1967,g:["Animação","Aventura","Musical"],d:"Wolfgang Reitherman",c:["Phil Harris","Sebastian Cabot"],s:"Um menino criado por lobos precisa retornar à aldeia humana enquanto um tigre faminto o caça.",st:"Disney+"},
+{t:"A Bela e a Fera",o:"Beauty and the Beast",y:1991,g:["Animação","Romance","Musical"],d:"Gary Trousdale e Kirk Wise",c:["Paige O'Hara","Robby Benson"],s:"Uma jovem é mantida no castelo de uma fera amaldiçoada e descobre a bondade por trás da aparência.",st:"Disney+"},
+{t:"Ladrão de Casaca",o:"To Catch a Thief",y:1955,g:["Mistério","Romance","Suspense"],d:"Alfred Hitchcock",c:["Cary Grant","Grace Kelly"],s:"Um ex-ladrão de joias precisa provar sua inocência quando uma onda de roubos imita seu estilo na Riviera.",st:"Universal+"},
+{t:"Intriga Internacional",o:"North by Northwest",y:1959,g:["Suspense","Mistério","Ação"],d:"Alfred Hitchcock",c:["Cary Grant","Eva Marie Saint"],s:"Um executivo é confundido com um espião e foge país afora para escapar de assassinos e da polícia.",st:"HBO Max"},
+{t:"Assim Caminha a Humanidade",o:"Giant",y:1956,g:["Drama","Faroeste"],d:"George Stevens",c:["Elizabeth Taylor","Rock Hudson","James Dean"],s:"Um casal de fazendeiros texanos atravessa gerações de mudanças sociais e descoberta de petróleo.",st:"HBO Max"},
+{t:"Juventude Transviada",o:"Rebel Without a Cause",y:1955,g:["Drama"],d:"Nicholas Ray",c:["James Dean","Natalie Wood"],s:"Três adolescentes inquietos confrontam famílias ausentes e a pressão social numa única noite turbulenta.",st:"HBO Max"},
+{t:"Bonnie e Clyde: Uma Rajada de Balas",o:"Bonnie and Clyde",y:1967,g:["Crime","Drama"],d:"Arthur Penn",c:["Warren Beatty","Faye Dunaway"],s:"Um casal de assaltantes vira lenda e fugitivo durante a Grande Depressão americana.",st:"HBO Max"},
+{t:"Perdidos na Noite",o:"Midnight Cowboy",y:1969,g:["Drama"],d:"John Schlesinger",c:["Dustin Hoffman","Jon Voight"],s:"Um caipira ingênuo e um trapaceiro doente forjam uma amizade improvável nas ruas de Nova York.",st:"HBO Max"},
+{t:"A Primeira Noite de um Homem",o:"The Graduate",y:1967,g:["Comédia","Drama","Romance"],d:"Mike Nichols",c:["Dustin Hoffman","Anne Bancroft","Katharine Ross"],s:"Um recém-formado sem rumo se envolve com uma mulher mais velha e depois com a filha dela.",st:"HBO Max"},
+{t:"Kramer vs. Kramer",o:"Kramer vs. Kramer",y:1979,g:["Drama"],d:"Robert Benton",c:["Dustin Hoffman","Meryl Streep"],s:"Um pai aprende a cuidar do filho sozinho até que a ex-esposa retorna para disputar a guarda.",st:"Disney+"},
+{t:"A Escolha de Sofia",o:"Sophie's Choice",y:1982,g:["Drama","Romance"],d:"Alan J. Pakula",c:["Meryl Streep","Kevin Kline","Peter MacNicol"],s:"Uma sobrevivente do Holocausto carrega um segredo devastador que aos poucos consome sua nova vida.",st:"Prime Video"},
+{t:"O Paciente Inglês",o:"The English Patient",y:1996,g:["Drama","Romance","Guerra"],d:"Anthony Minghella",c:["Ralph Fiennes","Juliette Binoche","Kristin Scott Thomas"],s:"Um homem queimado relembra um amor proibido vivido no deserto às vésperas da guerra.",st:"Disney+"},
+{t:"Os Imperdoáveis",o:"Unforgiven",y:1992,g:["Faroeste","Drama"],d:"Clint Eastwood",c:["Clint Eastwood","Gene Hackman","Morgan Freeman"],s:"Um pistoleiro aposentado aceita um último trabalho e confronta a violência que tentou deixar para trás.",st:"HBO Max"},
+{t:"Menina de Ouro",o:"Million Dollar Baby",y:2004,g:["Drama","Esporte"],d:"Clint Eastwood",c:["Hilary Swank","Clint Eastwood","Morgan Freeman"],s:"Um treinador relutante moldam uma boxeadora determinada até uma reviravolta mudar tudo.",st:"HBO Max"},
+{t:"Three Colors: Azul",o:"Trois Couleurs: Bleu",y:1993,g:["Drama","Mistério"],d:"Krzysztof Kieślowski",c:["Juliette Binoche","Benoît Régent"],s:"Após perder a família, uma mulher tenta recomeçar do zero e libertar-se do passado.",st:"HBO Max"},
+{t:"Fale com Ela",o:"Hable con Ella",y:2002,g:["Drama","Romance"],d:"Pedro Almodóvar",c:["Javier Cámara","Darío Grandinetti"],s:"Dois homens cuidam de mulheres em coma e desenvolvem uma amizade marcada por amor e dilemas morais.",st:"Prime Video"},
+{t:"Tudo Sobre Minha Mãe",o:"Todo Sobre Mi Madre",y:1999,g:["Drama"],d:"Pedro Almodóvar",c:["Cecilia Roth","Penélope Cruz"],s:"Uma mãe enlutada reencontra figuras de seu passado enquanto reconstrói sua vida em Barcelona.",st:"Prime Video"},
+{t:"Oldboy",o:"Oldeuboi",y:2003,g:["Suspense","Ação","Mistério"],d:"Park Chan-wook",c:["Choi Min-sik","Yoo Ji-tae"],s:"Um homem libertado após anos de cárcere misterioso tem cinco dias para descobrir quem o aprisionou e por quê.",st:"Prime Video"},
+{t:"A Criada",o:"Ah-ga-ssi",y:2016,g:["Drama","Romance","Suspense"],d:"Park Chan-wook",c:["Kim Min-hee","Kim Tae-ri"],s:"Uma trapaceira é contratada como criada de uma herdeira e o golpe planejado toma rumos inesperados.",st:"Prime Video"},
+{t:"Memórias de um Assassino",o:"Salinui Chueok",y:2003,g:["Crime","Drama","Mistério"],d:"Bong Joon-ho",c:["Song Kang-ho","Kim Sang-kyung"],s:"Detetives rurais investigam os primeiros assassinatos em série da Coreia com métodos desastrosos.",st:"Mercado Play"},
+{t:"O Hospedeiro",o:"Gwoemul",y:2006,g:["Terror","Ficção Científica","Drama"],d:"Bong Joon-ho",c:["Song Kang-ho","Bae Doona"],s:"Uma criatura mutante emerge do rio Han e uma família comum luta para resgatar uma menina capturada.",st:"Mercado Play"},
+{t:"Drive",o:"Drive",y:2011,g:["Crime","Drama","Ação"],d:"Nicolas Winding Refn",c:["Ryan Gosling","Carey Mulligan"],s:"Um piloto de fuga silencioso se envolve com a vizinha e mergulha num plano que dá violentamente errado.",st:"Prime Video"},
+{t:"Ela",o:"Her",y:2013,g:["Ficção Científica","Romance","Drama"],d:"Spike Jonze",c:["Joaquin Phoenix","Scarlett Johansson","Amy Adams"],s:"Um homem solitário se apaixona por uma inteligência artificial que conversa com ele como ninguém.",st:"HBO Max"},
+{t:"Ex Machina: Instinto Artificial",o:"Ex Machina",y:2014,g:["Ficção Científica","Drama","Suspense"],d:"Alex Garland",c:["Domhnall Gleeson","Alicia Vikander","Oscar Isaac"],s:"Um programador é convidado a testar uma androide e logo questiona quem está manipulando quem.",st:"HBO Max"},
+{t:"Garota Exemplar",o:"Gone Girl",y:2014,g:["Mistério","Suspense","Drama"],d:"David Fincher",c:["Ben Affleck","Rosamund Pike"],s:"O desaparecimento de uma esposa transforma o marido em suspeito enquanto verdades perturbadoras emergem.",st:"Disney+"},
+{t:"Zodíaco",o:"Zodiac",y:2007,g:["Crime","Mistério","Drama"],d:"David Fincher",c:["Jake Gyllenhaal","Mark Ruffalo","Robert Downey Jr."],s:"Jornalistas e policiais se obcecam por décadas tentando identificar um assassino em série que zomba das autoridades.",st:"Paramount+"},
+{t:"A Rede Social",o:"The Social Network",y:2010,g:["Drama","Biografia"],d:"David Fincher",c:["Jesse Eisenberg","Andrew Garfield","Justin Timberlake"],s:"A criação de uma rede social revolucionária vem acompanhada de traições e disputas judiciais entre amigos.",st:"Netflix"},
+{t:"O Homem que Não Vendeu Sua Alma",o:"A Man for All Seasons",y:1966,g:["Drama","Biografia","História"],d:"Fred Zinnemann",c:["Paul Scofield","Robert Shaw"],s:"Um homem de princípios enfrenta o rei da Inglaterra ao recusar trair sua consciência.",st:"Prime Video"},
+{t:"Lawrence da Arábia",o:"Lawrence of Arabia",y:1962,g:["Aventura","Drama","Guerra"],d:"David Lean",c:["Peter O'Toole","Alec Guinness","Omar Sharif"],s:"Um oficial britânico une tribos árabes numa revolta no deserto durante a Primeira Guerra.",st:"Mercado Play"},
+{t:"A Ponte do Rio Kwai",o:"The Bridge on the River Kwai",y:1957,g:["Guerra","Aventura","Drama"],d:"David Lean",c:["Alec Guinness","William Holden"],s:"Prisioneiros britânicos são forçados a construir uma ponte para os japoneses, gerando um orgulho perigoso.",st:"Mercado Play"},
+{t:"Spartacus",o:"Spartacus",y:1960,g:["Drama","Aventura","História"],d:"Stanley Kubrick",c:["Kirk Douglas","Laurence Olivier"],s:"Um escravo gladiador lidera uma revolta contra a opressão do Império Romano.",st:"Mercado Play"},
+{t:"Glória Feita de Sangue",o:"Paths of Glory",y:1957,g:["Guerra","Drama"],d:"Stanley Kubrick",c:["Kirk Douglas"],s:"Um coronel defende soldados injustamente julgados após uma ordem suicida na Primeira Guerra.",st:"HBO Max"},
+{t:"Dr. Fantástico",o:"Dr. Strangelove",y:1964,g:["Comédia","Guerra"],d:"Stanley Kubrick",c:["Peter Sellers","George C. Scott"],s:"Um erro militar coloca o mundo à beira de uma guerra nuclear numa sátira impecável da paranoia da Guerra Fria.",st:"HBO Max"},
+{t:"Nascido para Matar",o:"Full Metal Jacket",y:1987,g:["Guerra","Drama"],d:"Stanley Kubrick",c:["Matthew Modine","R. Lee Ermey","Vincent D'Onofrio"],s:"Recrutas são brutalizados no treinamento e depois jogados no inferno da guerra do Vietnã.",st:"HBO Max"},
+{t:"O Franco-Atirador",o:"The Deer Hunter",y:1978,g:["Guerra","Drama"],d:"Michael Cimino",c:["Robert De Niro","Christopher Walken","Meryl Streep"],s:"Amigos de uma cidade siderúrgica são despedaçados, física e psicologicamente, pela guerra do Vietnã.",st:"Universal+"},
+{t:"Platoon",o:"Platoon",y:1986,g:["Guerra","Drama"],d:"Oliver Stone",c:["Charlie Sheen","Willem Dafoe","Tom Berenger"],s:"Um jovem soldado vê a guerra do Vietnã corroer a moral de seu pelotão por dentro.",st:"Disney+"},
+{t:"A Hora Mais Escura",o:"Zero Dark Thirty",y:2012,g:["Suspense","Drama","História"],d:"Kathryn Bigelow",c:["Jessica Chastain","Jason Clarke"],s:"Uma analista da CIA dedica anos à caçada implacável pelo líder terrorista mais procurado do mundo.",st:"Universal+"},
+{t:"Guerra ao Terror",o:"The Hurt Locker",y:2008,g:["Guerra","Suspense","Drama"],d:"Kathryn Bigelow",c:["Jeremy Renner","Anthony Mackie"],s:"Um esquadrão antibombas no Iraque vive sob tensão constante liderado por um sargento viciado em risco.",st:"Disney+"},
+{t:"1917",o:"1917",y:2019,g:["Guerra","Drama"],d:"Sam Mendes",c:["George MacKay","Dean-Charles Chapman"],s:"Dois soldados atravessam território inimigo numa missão urgente para evitar um massacre na Primeira Guerra.",st:"Universal+"},
+{t:"Beleza Americana",o:"American Beauty",y:1999,g:["Drama"],d:"Sam Mendes",c:["Kevin Spacey","Annette Bening","Thora Birch"],s:"Um pai de família em crise existencial reavalia tudo ao se encantar pela amiga da filha.",st:"Disney+"},
+{t:"O Aviador",o:"The Aviator",y:2004,g:["Biografia","Drama"],d:"Martin Scorsese",c:["Leonardo DiCaprio","Cate Blanchett"],s:"A vida grandiosa e atormentada de um magnata da aviação e do cinema corroído pela obsessão.",st:"Universal+"},
+{t:"Ilha do Medo",o:"Shutter Island",y:2010,g:["Mistério","Suspense","Drama"],d:"Martin Scorsese",c:["Leonardo DiCaprio","Mark Ruffalo","Ben Kingsley"],s:"Um detetive investiga o sumiço de uma paciente em um hospital psiquiátrico cercado de segredos.",st:"Paramount+"},
+{t:"Assassinos da Lua das Flores",o:"Killers of the Flower Moon",y:2023,g:["Crime","Drama","História"],d:"Martin Scorsese",c:["Leonardo DiCaprio","Robert De Niro","Lily Gladstone"],s:"Uma série de assassinatos de indígenas Osage ricos em petróleo expõe uma conspiração cruel nos EUA.",st:"Apple TV+"},
+{t:"CODA: No Ritmo do Coração",o:"CODA",y:2021,g:["Drama","Música"],d:"Sian Heder",c:["Emilia Jones","Troy Kotsur","Marlee Matlin"],s:"A única ouvinte de uma família surda precisa escolher entre o sonho de cantar e o dever com os seus.",st:"Apple TV+"},
+{t:"O Som do Silêncio",o:"Sound of Metal",y:2019,g:["Drama","Música"],d:"Darius Marder",c:["Riz Ahmed","Olivia Cooke"],s:"Um baterista perde a audição e precisa reconstruir sua identidade longe da música.",st:"Prime Video"},
+{t:"Manchester à Beira-Mar",o:"Manchester by the Sea",y:2016,g:["Drama"],d:"Kenneth Lonergan",c:["Casey Affleck","Michelle Williams","Lucas Hedges"],s:"Um homem traumatizado volta à cidade natal para cuidar do sobrinho e encarar feridas do passado.",st:"Prime Video"},
+{t:"Me Chame Pelo Seu Nome",o:"Call Me by Your Name",y:2017,g:["Romance","Drama"],d:"Luca Guadagnino",c:["Timothée Chalamet","Armie Hammer"],s:"Num verão italiano, um adolescente vive um primeiro amor intenso e transformador com um estudante mais velho.",st:"Globoplay"},
+{t:"Amor",o:"Amour",y:2012,g:["Drama","Romance"],d:"Michael Haneke",c:["Jean-Louis Trintignant","Emmanuelle Riva"],s:"Um casal idoso enfrenta o declínio da saúde de um deles num retrato terno e implacável do amor.",st:"Prime Video"},
+{t:"A Fita Branca",o:"Das weiße Band",y:2009,g:["Drama","Mistério"],d:"Michael Haneke",c:["Christian Friedel","Ernst Jacobi"],s:"Eventos perturbadores numa vila alemã às vésperas da Primeira Guerra sugerem uma maldade enraizada.",st:"Prime Video"},
+{t:"Dogville",o:"Dogville",y:2003,g:["Drama","Mistério"],d:"Lars von Trier",c:["Nicole Kidman","Paul Bettany"],s:"Uma fugitiva acolhida por uma pequena cidade descobre o preço cruel da bondade condicional.",st:"Prime Video"},
+{t:"Melancolia",o:"Melancholia",y:2011,g:["Drama","Ficção Científica"],d:"Lars von Trier",c:["Kirsten Dunst","Charlotte Gainsbourg"],s:"Duas irmãs reagem de formas opostas à aproximação de um planeta em rota de colisão com a Terra.",st:"Prime Video"},
+{t:"A Grande Beleza",o:"La Grande Bellezza",y:2013,g:["Drama"],d:"Paolo Sorrentino",c:["Toni Servillo"],s:"Um escritor desencantado vagueia pela alta sociedade romana em busca da beleza que lhe escapa.",st:"Prime Video"},
+{t:"Capitães de Areia",o:"Capitães da Areia",y:2011,g:["Drama"],d:"Cecília Amado",c:["Jean Luis Amorim","Ana Geraldo"],s:"Meninos de rua de Salvador formam um bando e lutam para sobreviver à margem da sociedade.",st:"Globoplay"},
+{t:"O Pagador de Promessas",o:"O Pagador de Promessas",y:1962,g:["Drama"],d:"Anselmo Duarte",c:["Leonardo Villar","Glória Menezes"],s:"Um camponês cumpre uma promessa carregando uma cruz à igreja e enfrenta a intransigência das instituições.",st:"Globoplay"},
+{t:"Deus e o Diabo na Terra do Sol",o:"Deus e o Diabo na Terra do Sol",y:1964,g:["Drama","Faroeste"],d:"Glauber Rocha",c:["Geraldo Del Rey","Yoná Magalhães"],s:"Um vaqueiro do sertão segue líderes messiânicos e cangaceiros em busca de salvação e justiça.",st:"Globoplay"},
+{t:"Macunaíma",o:"Macunaíma",y:1969,g:["Comédia","Fantasia"],d:"Joaquim Pedro de Andrade",c:["Grande Otelo","Paulo José"],s:"Um anti-herói brasileiro vive aventuras alegóricas que satirizam a identidade nacional.",st:"Globoplay"},
+{t:"Carandiru",o:"Carandiru",y:2003,g:["Drama","Crime"],d:"Hector Babenco",c:["Luiz Carlos Vasconcelos","Milton Gonçalves"],s:"Um médico conhece as histórias dos detentos de um presídio superlotado às vésperas de um massacre.",st:"Globoplay"},
+{t:"O Som ao Redor",o:"O Som ao Redor",y:2012,g:["Drama","Suspense"],d:"Kleber Mendonça Filho",c:["Irandhir Santos","Maeve Jinkings"],s:"A chegada de seguranças particulares a uma rua de classe média do Recife revela tensões de classe latentes.",st:"Globoplay"},
+{t:"Aquarius",o:"Aquarius",y:2016,g:["Drama"],d:"Kleber Mendonça Filho",c:["Sônia Braga"],s:"Uma mulher resiste à pressão de uma construtora que quer demolir o prédio onde mora há décadas.",st:"Globoplay"},
+{t:"Bicho de Sete Cabeças",o:"Bicho de Sete Cabeças",y:2001,g:["Drama"],d:"Laís Bodanzky",c:["Rodrigo Santoro","Othon Bastos"],s:"Um jovem é internado à força em um manicômio pelo pai e luta contra o sistema psiquiátrico.",st:"Globoplay"},
+{t:"Lavoura Arcaica",o:"Lavoura Arcaica",y:2001,g:["Drama"],d:"Luiz Fernando Carvalho",c:["Selton Mello","Raul Cortez"],s:"Um filho rebelde retorna ao seio de uma família rural rígida e dilacerada por desejos reprimidos.",st:"Globoplay"},
+{t:"Pixote: A Lei do Mais Fraco",o:"Pixote",y:1980,g:["Drama","Crime"],d:"Hector Babenco",c:["Fernando Ramos da Silva","Marília Pêra"],s:"Um menino de rua sobrevive à brutalidade de instituições e do crime nas grandes cidades brasileiras.",st:"Globoplay"},
+{t:"Estômago",o:"Estômago",y:2007,g:["Drama","Comédia"],d:"Marcos Jorge",c:["João Miguel","Fabiula Nascimento"],s:"Um cozinheiro talentoso usa a culinária para ganhar poder dentro e fora da prisão.",st:"Globoplay"},
+{t:"O Homem Elefante",o:"The Elephant Man",y:1980,g:["Drama","Biografia"],d:"David Lynch",c:["Anthony Hopkins","John Hurt"],s:"Um homem severamente deformado encontra dignidade e compaixão na Londres vitoriana.",st:"Disney+"},
+{t:"Réquiem para um Sonho",o:"Requiem for a Dream",y:2000,g:["Drama"],d:"Darren Aronofsky",c:["Ellen Burstyn","Jared Leto","Jennifer Connelly"],s:"Quatro pessoas mergulham em vícios diferentes que destroem progressivamente seus sonhos e suas vidas.",st:"Disney+"},
+{t:"Donnie Darko",o:"Donnie Darko",y:2001,g:["Ficção Científica","Suspense","Drama"],d:"Richard Kelly",c:["Jake Gyllenhaal","Jena Malone"],s:"Um adolescente atormentado por visões de um coelho sinistro começa a duvidar da própria realidade.",st:"Prime Video"},
+{t:"Os Excêntricos Tenenbaums",o:"The Royal Tenenbaums",y:2001,g:["Comédia","Drama"],d:"Wes Anderson",c:["Gene Hackman","Anjelica Huston","Bill Murray"],s:"Um patriarca distante reúne os filhos gênios e disfuncionais sob o pretexto de uma doença fingida.",st:"Disney+"},
+{t:"Moonrise Kingdom",o:"Moonrise Kingdom",y:2012,g:["Comédia","Romance","Aventura"],d:"Wes Anderson",c:["Jared Gilman","Kara Hayward","Bruce Willis"],s:"Duas crianças apaixonadas fogem juntas e viram uma ilha de cabeça para baixo em sua busca.",st:"Disney+"},
+{t:"Pequena Miss Sunshine",o:"Little Miss Sunshine",y:2006,g:["Comédia","Drama"],d:"Jonathan Dayton e Valerie Faris",c:["Greg Kinnear","Toni Collette","Steve Carell"],s:"Uma família caótica atravessa o país numa van para levar a filha a um concurso de beleza infantil.",st:"Disney+"},
+{t:"Juno",o:"Juno",y:2007,g:["Comédia","Drama"],d:"Jason Reitman",c:["Elliot Page","Michael Cera","Jennifer Garner"],s:"Uma adolescente grávida decide entregar o bebê e encara as complexidades de crescer rápido demais.",st:"Disney+"},
+{t:"Lady Bird: A Hora de Voar",o:"Lady Bird: A Hora de Voar",y:2017,g:["Comédia","Drama"],d:"Greta Gerwig",c:["Saoirse Ronan","Laurie Metcalf"],s:"Uma adolescente rebelde sonha em escapar de sua cidade enquanto colide com a mãe e cresce no processo.",st:"Globoplay"},
+{t:"Pequenas Grandes Mulheres",o:"Little Women",y:2019,g:["Drama","Romance"],d:"Greta Gerwig",c:["Saoirse Ronan","Emma Watson","Florence Pugh"],s:"Quatro irmãs descobrem amor, arte e independência na Nova Inglaterra do século XIX.",st:"Netflix"},
+{t:"Vidas Passadas",o:"Past Lives",y:2023,g:["Romance","Drama"],d:"Celine Song",c:["Greta Lee","Teo Yoo"],s:"Dois amigos de infância se reencontram décadas depois e questionam o que poderia ter sido.",st:"Globoplay"},
+{t:"A Substância",o:"The Substance",y:2024,g:["Terror","Ficção Científica","Drama"],d:"Coralie Fargeat",c:["Demi Moore","Margaret Qualley"],s:"Uma estrela em declínio usa uma droga misteriosa que gera uma versão mais jovem de si com consequências grotescas.",st:"Mercado Play"},
+{t:"Conclave",o:"Conclave",y:2024,g:["Drama","Suspense","Mistério"],d:"Edward Berger",c:["Ralph Fiennes","Stanley Tucci","John Lithgow"],s:"Após a morte do papa, um cardeal conduz a eleição secreta e descobre segredos perigosos dentro do Vaticano.",st:"Prime Video"},
+{t:"O Brutalista",o:"The Brutalist",y:2024,g:["Drama","História"],d:"Brady Corbet",c:["Adrien Brody","Felicity Jones","Guy Pearce"],s:"Um arquiteto imigrante luta para reconstruir a vida e a carreira nos Estados Unidos do pós-guerra.",st:"Universal+"},
+{t:"Flow",o:"Flow",y:2024,g:["Animação","Aventura","Fantasia"],d:"Gints Zilbalodis",c:["(sem diálogos)"],s:"Em um mundo inundado, um gato solitário precisa cooperar com outros animais para sobreviver.",st:"Mercado Play"},
+{t:"Robô Selvagem",o:"The Wild Robot",y:2024,g:["Animação","Aventura","Ficção Científica"],d:"Chris Sanders",c:["Lupita Nyong'o","Pedro Pascal"],s:"Um robô náufrago numa ilha aprende a sobreviver e acaba criando um filhote de ganso órfão.",st:"Universal+"},
+{t:"Divertida Mente 2",o:"Inside Out 2",y:2024,g:["Animação","Aventura","Comédia"],d:"Kelsey Mann",c:["Amy Poehler","Maya Hawke"],s:"Novas emoções chegam à mente de uma adolescente e disputam o controle durante a turbulência da puberdade.",st:"Disney+"},
+{t:"Homem-Aranha: Sem Volta para Casa",o:"Spider-Man: No Way Home",y:2021,g:["Ação","Aventura","Ficção Científica"],d:"Jon Watts",c:["Tom Holland","Zendaya","Benedict Cumberbatch"],s:"Um feitiço que dá errado abre o multiverso e traz vilões de outras realidades para enfrentar o herói.",st:"Disney+"},
+{t:"Pantera Negra",o:"Black Panther",y:2018,g:["Ação","Aventura","Ficção Científica"],d:"Ryan Coogler",c:["Chadwick Boseman","Michael B. Jordan","Lupita Nyong'o"],s:"O novo rei de uma nação africana tecnologicamente avançada precisa proteger seu trono e seu povo.",st:"Disney+"},
+{t:"Guardiões da Galáxia",o:"Guardians of the Galaxy",y:2014,g:["Ação","Aventura","Ficção Científica"],d:"James Gunn",c:["Chris Pratt","Zoe Saldaña","Bradley Cooper"],s:"Um grupo improvável de foras-da-lei se une para impedir que um fanático destrua a galáxia.",st:"Disney+"},
+{t:"Top Gun: Maverick",o:"Top Gun: Maverick",y:2022,g:["Ação","Drama"],d:"Joseph Kosinski",c:["Tom Cruise","Miles Teller","Jennifer Connelly"],s:"Um piloto veterano treina uma nova geração para uma missão quase suicida e enfrenta seus fantasmas.",st:"Paramount+"},
+{t:"John Wick: De Volta ao Jogo",o:"John Wick",y:2014,g:["Ação","Crime","Suspense"],d:"Chad Stahelski",c:["Keanu Reeves","Michael Nyqvist"],s:"Um assassino aposentado volta à ativa para vingar a morte de seu cachorro, último presente de sua esposa.",st:"Globoplay"},
+{t:"Kill Bill: Volume 1",o:"Kill Bill: Vol. 1",y:2003,g:["Ação","Crime","Suspense"],d:"Quentin Tarantino",c:["Uma Thurman","Lucy Liu","David Carradine"],s:"Uma ex-assassina busca vingança contra a equipe que a traiu no dia de seu casamento.",st:"Disney+"},
+{t:"Cidade do Pecado",o:"Sin City",y:2005,g:["Crime","Suspense","Ação"],d:"Robert Rodriguez e Frank Miller",c:["Bruce Willis","Mickey Rourke","Jessica Alba"],s:"Histórias violentas e estilizadas se entrelaçam numa cidade dominada pela corrupção e pelo crime.",st:"Prime Video"},
+{t:"V de Vingança",o:"V for Vendetta",y:2005,g:["Ação","Ficção Científica","Drama"],d:"James McTeigue",c:["Natalie Portman","Hugo Weaving"],s:"Numa Inglaterra distópica, um revolucionário mascarado inspira o povo a se levantar contra a tirania.",st:"HBO Max"},
+{t:"Filhos da Esperança",o:"Children of Men",y:2006,g:["Ficção Científica","Drama","Suspense"],d:"Alfonso Cuarón",c:["Clive Owen","Julianne Moore","Michael Caine"],s:"Num futuro em que a humanidade ficou infértil, um homem protege a primeira grávida em quase duas décadas.",st:"Disney+"},
+{t:"Snowpiercer: Expresso do Amanhã",o:"Snowpiercer",y:2013,g:["Ficção Científica","Ação","Drama"],d:"Bong Joon-ho",c:["Chris Evans","Song Kang-ho","Tilda Swinton"],s:"Sobreviventes de uma nova era glacial vivem num trem em movimento perpétuo dividido por classes sociais.",st:"Netflix"},
+{t:"O Grande Lebowski",o:"The Big Lebowski",y:1998,g:["Comédia","Crime"],d:"Joel e Ethan Coen",c:["Jeff Bridges","John Goodman","Julianne Moore"],s:"Um boêmio preguiçoso é confundido com um milionário e se enrola numa trama de sequestro absurda.",st:"Disney+"},
+{t:"Quase Famosos",o:"Almost Famous",y:2000,g:["Drama","Música"],d:"Cameron Crowe",c:["Patrick Fugit","Kate Hudson","Billy Crudup"],s:"Um adolescente vira jornalista de rock e sai em turnê com uma banda em ascensão nos anos 1970.",st:"Disney+"},
+{t:"Antes do Amanhecer",o:"Before Sunrise",y:1995,g:["Romance","Drama"],d:"Richard Linklater",c:["Ethan Hawke","Julie Delpy"],s:"Dois estranhos se conhecem num trem e passam uma única noite caminhando e conversando por Viena.",st:"HBO Max"},
+{t:"Boyhood: Da Infância à Juventude",o:"Boyhood",y:2014,g:["Drama"],d:"Richard Linklater",c:["Ellar Coltrane","Patricia Arquette","Ethan Hawke"],s:"Filmado ao longo de doze anos, acompanha um garoto e sua família amadurecendo em tempo real.",st:"Universal+"},
+{t:"A Caça",o:"Jagten",y:2012,g:["Drama"],d:"Thomas Vinterberg",c:["Mads Mikkelsen"],s:"Um professor de creche tem a vida destruída por uma acusação falsa que se espalha por sua pequena cidade.",st:"Prime Video"},
+{t:"Druk: Mais uma Rodada",o:"Druk",y:2020,g:["Drama","Comédia"],d:"Thomas Vinterberg",c:["Mads Mikkelsen"],s:"Quatro professores fazem um experimento bebendo todos os dias para testar se isso melhora suas vidas.",st:"Globoplay"},
+{t:"Festa de Família",o:"Festen",y:1998,g:["Drama"],d:"Thomas Vinterberg",c:["Ulrich Thomsen","Henning Moritzen"],s:"Durante o aniversário do patriarca, um filho revela um segredo familiar devastador diante de todos.",st:"Prime Video"},
+{t:"O Sacrifício do Cervo Sagrado",o:"The Killing of a Sacred Deer",y:2017,g:["Suspense","Terror","Mistério"],d:"Yorgos Lanthimos",c:["Colin Farrell","Nicole Kidman","Barry Keoghan"],s:"Um cirurgião vê sua família ameaçada por uma maldição inexplicável ligada a um adolescente perturbador.",st:"Globoplay"},
+{t:"O Lagosta",o:"The Lobster",y:2015,g:["Ficção Científica","Comédia","Romance"],d:"Yorgos Lanthimos",c:["Colin Farrell","Rachel Weisz"],s:"Numa sociedade absurda, solteiros têm 45 dias para encontrar par ou serão transformados em animais.",st:"Globoplay"},
+{t:"Na Mira do Chefe",o:"In Bruges",y:2008,g:["Comédia","Crime","Drama"],d:"Martin McDonagh",c:["Colin Farrell","Brendan Gleeson","Ralph Fiennes"],s:"Dois assassinos se escondem numa cidade belga após um trabalho dar errado, com consequências trágicas.",st:"Disney+"},
+{t:"Os Banshees de Inisherin",o:"The Banshees of Inisherin",y:2022,g:["Comédia","Drama"],d:"Martin McDonagh",c:["Colin Farrell","Brendan Gleeson"],s:"Numa ilha irlandesa, uma amizade de toda a vida termina de repente e desencadeia uma espiral sombria.",st:"Disney+"},
+{t:"Tár",o:"Tár",y:2022,g:["Drama","Música"],d:"Todd Field",c:["Cate Blanchett"],s:"Uma maestrina renomada vê sua carreira e seu poder ruírem em meio a acusações e à própria arrogância.",st:"Universal+"},
+{t:"Estrelas Além do Tempo",o:"Hidden Figures",y:2016,g:["Drama","Biografia","História"],d:"Theodore Melfi",c:["Taraji P. Henson","Octavia Spencer","Janelle Monáe"],s:"Três matemáticas negras enfrentam o racismo e impulsionam a corrida espacial dos Estados Unidos.",st:"Disney+"},
+{t:"Histórias Cruzadas",o:"The Help",y:2011,g:["Drama"],d:"Tate Taylor",c:["Viola Davis","Emma Stone","Octavia Spencer"],s:"Uma jovem escritora reúne relatos de empregadas negras e expõe o racismo cotidiano no sul dos EUA.",st:"Disney+"},
+{t:"12 Anos de Escravidão",o:"12 Years a Slave",y:2013,g:["Drama","Biografia","História"],d:"Steve McQueen",c:["Chiwetel Ejiofor","Michael Fassbender","Lupita Nyong'o"],s:"Um homem negro livre é sequestrado e vendido como escravo, lutando por anos para reconquistar a liberdade.",st:"Disney+"},
+{t:"O Discurso do Rei",o:"The King's Speech",y:2010,g:["Drama","Biografia","História"],d:"Tom Hooper",c:["Colin Firth","Geoffrey Rush","Helena Bonham Carter"],s:"Um rei gago busca a ajuda de um terapeuta heterodoxo para encontrar sua voz às vésperas da guerra.",st:"Disney+"},
+{t:"O Jogo da Imitação",o:"The Imitation Game",y:2014,g:["Drama","Biografia","Guerra"],d:"Morten Tyldum",c:["Benedict Cumberbatch","Keira Knightley"],s:"Um matemático brilhante lidera o esforço secreto para quebrar o código nazista durante a Segunda Guerra.",st:"Prime Video"},
+{t:"Uma Mente Brilhante",o:"A Beautiful Mind",y:2001,g:["Drama","Biografia"],d:"Ron Howard",c:["Russell Crowe","Jennifer Connelly"],s:"Um matemático genial luta contra a esquizofrenia enquanto realiza descobertas revolucionárias.",st:"Universal+"},
+{t:"A Teoria de Tudo",o:"The Theory of Everything",y:2014,g:["Drama","Biografia","Romance"],d:"James Marsh",c:["Eddie Redmayne","Felicity Jones"],s:"A história de amor e resiliência de Stephen Hawking diante de uma doença degenerativa.",st:"Universal+"},
+{t:"Spotlight: Segredos Revelados",o:"Spotlight",y:2015,g:["Drama","Biografia","Crime"],d:"Tom McCarthy",c:["Mark Ruffalo","Michael Keaton","Rachel McAdams"],s:"Jornalistas investigativos expõem o encobrimento de abusos sexuais por parte da Igreja Católica.",st:"Globoplay"},
+{t:"Vício Frenético",o:"Uncut Gems",y:2019,g:["Crime","Drama","Suspense"],d:"Josh e Benny Safdie",c:["Adam Sandler","Julia Fox"],s:"Um joalheiro viciado em apostas tenta saldar dívidas com um esquema cada vez mais arriscado.",st:"Netflix"},
+{t:"Frances Ha",o:"Frances Ha",y:2012,g:["Comédia","Drama"],d:"Noah Baumbach",c:["Greta Gerwig","Mickey Sumner"],s:"Uma jovem dançarina em Nova York tenta encontrar seu rumo enquanto sua melhor amiga segue em frente.",st:"Globoplay"},
+{t:"História de um Casamento",o:"Marriage Story",y:2019,g:["Drama","Romance"],d:"Noah Baumbach",c:["Adam Driver","Scarlett Johansson","Laura Dern"],s:"Um casal atravessa um divórcio doloroso que expõe amor, mágoa e a burocracia que os separa.",st:"Netflix"},
+{t:"Capote",o:"Capote",y:2005,g:["Drama","Biografia","Crime"],d:"Bennett Miller",c:["Philip Seymour Hoffman","Catherine Keener"],s:"Um escritor se aproxima de assassinos condenados para escrever a obra que definiria sua carreira.",st:"Prime Video"},
+{t:"O Homem que Mudou o Jogo",o:"Moneyball",y:2011,g:["Drama","Biografia","Esporte"],d:"Bennett Miller",c:["Brad Pitt","Jonah Hill","Philip Seymour Hoffman"],s:"Um gerente de beisebol usa estatísticas pouco convencionais para montar um time vencedor com pouco dinheiro.",st:"Prime Video"},
+{t:"Foxcatcher: Uma História que Chocou o Mundo",o:"Foxcatcher",y:2014,g:["Drama","Biografia","Esporte"],d:"Bennett Miller",c:["Steve Carell","Channing Tatum","Mark Ruffalo"],s:"A relação obsessiva entre um milionário e dois lutadores olímpicos termina em tragédia.",st:"Prime Video"},
+{t:"O Mestre",o:"The Master",y:2012,g:["Drama"],d:"Paul Thomas Anderson",c:["Joaquin Phoenix","Philip Seymour Hoffman","Amy Adams"],s:"Um veterano de guerra à deriva cai sob o fascínio do líder carismático de um movimento religioso.",st:"Disney+"},
+{t:"Trama Fantasma",o:"Phantom Thread",y:2017,g:["Drama","Romance"],d:"Paul Thomas Anderson",c:["Daniel Day-Lewis","Vicky Krieps"],s:"Um costureiro obsessivo vê sua rotina rígida ser desafiada por uma musa de vontade própria.",st:"Universal+"},
+{t:"Licorice Pizza",o:"Licorice Pizza",y:2021,g:["Comédia","Romance","Drama"],d:"Paul Thomas Anderson",c:["Alana Haim","Cooper Hoffman"],s:"Dois jovens vivem um romance hesitante e cheio de tropeços no vale de Los Angeles dos anos 1970.",st:"Universal+"},
+{t:"Adaptação",o:"Adaptation",y:2002,g:["Comédia","Drama"],d:"Spike Jonze",c:["Nicolas Cage","Meryl Streep","Chris Cooper"],s:"Um roteirista bloqueado se enrola ao tentar adaptar um livro, e a própria criação invade sua vida.",st:"Prime Video"},
+{t:"Quero Ser John Malkovich",o:"Being John Malkovich",y:1999,g:["Comédia","Fantasia","Drama"],d:"Spike Jonze",c:["John Cusack","Cameron Diaz","Catherine Keener"],s:"Um titereiro descobre um portal que leva à mente de um ator famoso e o transforma em negócio.",st:"Prime Video"},
+{t:"Síndrome de Cassandra",o:"Synecdoche, New York",y:2008,g:["Drama"],d:"Charlie Kaufman",c:["Philip Seymour Hoffman","Samantha Morton"],s:"Um diretor de teatro constrói uma réplica gigantesca de sua vida que nunca termina de se completar.",st:"Prime Video"},
+{t:"O Náufrago",o:"Cast Away",y:2000,g:["Aventura","Drama"],d:"Robert Zemeckis",c:["Tom Hanks","Helen Hunt"],s:"Um executivo sobrevive a um acidente aéreo e precisa se reinventar sozinho numa ilha deserta por anos.",st:"Paramount+"},
+{t:"Na Natureza Selvagem",o:"Into the Wild",y:2007,g:["Aventura","Drama","Biografia"],d:"Sean Penn",c:["Emile Hirsch","Vince Vaughn"],s:"Um jovem abandona tudo e parte rumo ao Alasca em busca de uma vida pura longe da sociedade.",st:"Disney+"},
+{t:"127 Horas",o:"127 Hours",y:2010,g:["Aventura","Drama","Biografia"],d:"Danny Boyle",c:["James Franco"],s:"Um alpinista fica preso por um braço sob uma rocha e precisa de uma decisão extrema para sobreviver.",st:"Disney+"},
+{t:"A Vida Secreta de Walter Mitty",o:"The Secret Life of Walter Mitty",y:2013,g:["Aventura","Comédia","Drama"],d:"Ben Stiller",c:["Ben Stiller","Kristen Wiig"],s:"Um sonhador tímido embarca numa aventura real ao redor do mundo em busca de uma foto perdida.",st:"Disney+"},
+{t:"Perdido em Marte",o:"The Martian",y:2015,g:["Ficção Científica","Aventura","Drama"],d:"Ridley Scott",c:["Matt Damon","Jessica Chastain"],s:"Dado como morto e abandonado em Marte, um astronauta usa engenhosidade para sobreviver e ser resgatado.",st:"Disney+"},
+{t:"Gravidade",o:"Gravity",y:2013,g:["Ficção Científica","Suspense","Drama"],d:"Alfonso Cuarón",c:["Sandra Bullock","George Clooney"],s:"Após um desastre no espaço, uma astronauta luta pela sobrevivência à deriva na imensidão silenciosa.",st:"HBO Max"},
+{t:"Apollo 13: Do Desastre ao Triunfo",o:"Apollo 13",y:1995,g:["Drama","História","Aventura"],d:"Ron Howard",c:["Tom Hanks","Kevin Bacon","Bill Paxton"],s:"Uma missão lunar dá errado e a tripulação e a NASA improvisam para trazer os astronautas de volta vivos.",st:"Universal+"},
+{t:"O Primeiro Homem",o:"First Man",y:2018,g:["Drama","Biografia","História"],d:"Damien Chazelle",c:["Ryan Gosling","Claire Foy"],s:"Os bastidores íntimos e tensos da jornada de Neil Armstrong até se tornar o primeiro homem na Lua.",st:"Universal+"},
+{t:"Contato",o:"Contact",y:1997,g:["Ficção Científica","Drama","Mistério"],d:"Robert Zemeckis",c:["Jodie Foster","Matthew McConaughey"],s:"Uma cientista detecta um sinal alienígena e enfrenta o embate entre ciência, fé e a busca por sentido.",st:"HBO Max"},
+{t:"Distrito 9",o:"District 9",y:2009,g:["Ficção Científica","Ação","Suspense"],d:"Neill Blomkamp",c:["Sharlto Copley"],s:"Alienígenas refugiados vivem segregados na África do Sul até que um funcionário começa a se transformar em um deles.",st:"Prime Video"},
+{t:"Looper: Assassinos do Futuro",o:"Looper",y:2012,g:["Ficção Científica","Ação","Suspense"],d:"Rian Johnson",c:["Joseph Gordon-Levitt","Bruce Willis","Emily Blunt"],s:"Um assassino que elimina alvos enviados do futuro se depara com a versão mais velha de si mesmo.",st:"Globoplay"},
+{t:"Entre Facas e Segredos",o:"Knives Out",y:2019,g:["Mistério","Crime","Comédia"],d:"Rian Johnson",c:["Daniel Craig","Ana de Armas","Chris Evans"],s:"Um detetive excêntrico investiga a morte de um escritor rico em meio a uma família cheia de suspeitos.",st:"Prime Video"},
+{t:"Prisioneiros",o:"Prisoners",y:2013,g:["Crime","Drama","Suspense"],d:"Denis Villeneuve",c:["Hugh Jackman","Jake Gyllenhaal","Viola Davis"],s:"Um pai desesperado toma a justiça nas próprias mãos quando a filha desaparece e o suspeito é solto.",st:"Globoplay"},
+{t:"Sicario: Terra de Ninguém",o:"Sicario",y:2015,g:["Crime","Ação","Suspense"],d:"Denis Villeneuve",c:["Emily Blunt","Benicio del Toro","Josh Brolin"],s:"Uma agente do FBI entra numa operação obscura contra os cartéis e descobre que as regras não existem.",st:"Globoplay"},
+{t:"Incêndios",o:"Incendies",y:2010,g:["Drama","Mistério","Guerra"],d:"Denis Villeneuve",c:["Lubna Azabal","Mélissa Désormeaux-Poulin"],s:"Gêmeos seguem o testamento da mãe e desenterram um segredo de guerra que reescreve sua própria origem.",st:"Globoplay"},
+{t:"O Apartamento",o:"The Apartment",y:1960,g:["Comédia","Romance","Drama"],d:"Billy Wilder",c:["Jack Lemmon","Shirley MacLaine"],s:"Um funcionário empresta seu apartamento aos chefes para subir na carreira até se apaixonar pela mulher errada.",st:"Prime Video"},
+{t:"Bonequinha de Luxo",o:"Breakfast at Tiffany's",y:1961,g:["Romance","Comédia","Drama"],d:"Blake Edwards",c:["Audrey Hepburn","George Peppard"],s:"Uma socialite excêntrica de Nova York foge do passado até que um vizinho escritor a faz repensar tudo.",st:"Paramount+"},
+{t:"A Princesa e o Plebeu",o:"Roman Holiday",y:1953,g:["Romance","Comédia"],d:"William Wyler",c:["Audrey Hepburn","Gregory Peck"],s:"Uma princesa entediada foge por um dia em Roma e vive um romance secreto com um jornalista.",st:"Paramount+"},
+{t:"O Sol é para Todos",o:"To Kill a Mockingbird",y:1962,g:["Drama","Crime"],d:"Robert Mulligan",c:["Gregory Peck","Mary Badham"],s:"Um advogado íntegro defende um homem negro injustamente acusado numa cidade racista do sul dos EUA.",st:"Universal+"},
+{t:"Sociedade dos Poetas Mortos",o:"Dead Poets Society",y:1989,g:["Drama"],d:"Peter Weir",c:["Robin Williams","Robert Sean Leonard","Ethan Hawke"],s:"Um professor inspirador desafia alunos de um colégio tradicional a pensarem por si e a viverem intensamente.",st:"Disney+"},
+{t:"Gênio Indomável",o:"Good Will Hunting",y:1997,g:["Drama"],d:"Gus Van Sant",c:["Matt Damon","Robin Williams","Ben Affleck"],s:"Um jovem gênio com passado difícil encontra num terapeuta a chance de enfrentar seus traumas.",st:"Disney+"},
+{t:"Conta Comigo",o:"Stand by Me",y:1986,g:["Drama","Aventura"],d:"Rob Reiner",c:["Wil Wheaton","River Phoenix","Corey Feldman"],s:"Quatro amigos partem numa jornada para encontrar um corpo e descobrem muito sobre crescer no caminho.",st:"Prime Video"},
+{t:"A Princesa Prometida",o:"The Princess Bride",y:1987,g:["Aventura","Fantasia","Romance"],d:"Rob Reiner",c:["Cary Elwes","Robin Wright"],s:"Um conto de fadas repleto de duelos, piratas e humor sobre um amor verdadeiro à prova de tudo.",st:"Disney+"},
+{t:"Os Goonies",o:"The Goonies",y:1985,g:["Aventura","Comédia","Família"],d:"Richard Donner",c:["Sean Astin","Josh Brolin"],s:"Um grupo de crianças segue um mapa antigo em busca de um tesouro pirata para salvar suas casas.",st:"HBO Max"},
+{t:"A História Sem Fim",o:"The NeverEnding Story",y:1984,g:["Fantasia","Aventura","Família"],d:"Wolfgang Petersen",c:["Barret Oliver","Noah Hathaway"],s:"Um menino tímido é sugado para dentro de um livro mágico cujo mundo de fantasia está sendo destruído.",st:"HBO Max"},
+{t:"Edward Mãos de Tesoura",o:"Edward Scissorhands",y:1990,g:["Fantasia","Romance","Drama"],d:"Tim Burton",c:["Johnny Depp","Winona Ryder"],s:"Uma criatura gentil com tesouras no lugar das mãos tenta encontrar seu lugar num subúrbio colorido.",st:"Disney+"},
+{t:"O Estranho Mundo de Jack",o:"The Nightmare Before Christmas",y:1993,g:["Animação","Fantasia","Musical"],d:"Henry Selick",c:["Chris Sarandon","Catherine O'Hara"],s:"O rei do Halloween descobre o Natal e decide, com resultados caóticos, comandar a festa.",st:"Disney+"},
+{t:"Coraline e o Mundo Secreto",o:"Coraline",y:2009,g:["Animação","Fantasia","Terror"],d:"Henry Selick",c:["Dakota Fanning","Teri Hatcher"],s:"Uma menina descobre uma porta para um mundo paralelo encantador que esconde um perigo sombrio.",st:"Globoplay"},
+{t:"Klaus",o:"Klaus",y:2019,g:["Animação","Comédia","Família"],d:"Sergio Pablos",c:["Jason Schwartzman","J.K. Simmons"],s:"Um carteiro preguiçoso e um brinquedeiro recluso reinventam, sem querer, a lenda do Papai Noel.",st:"Netflix"},
+{t:"Shrek",o:"Shrek",y:2001,g:["Animação","Comédia","Aventura"],d:"Andrew Adamson e Vicky Jenson",c:["Mike Myers","Eddie Murphy","Cameron Diaz"],s:"Um ogro rabugento parte para resgatar uma princesa e descobre amizade e amor no caminho.",st:"Universal+"},
+{t:"Como Treinar o Seu Dragão",o:"How to Train Your Dragon",y:2010,g:["Animação","Aventura","Família"],d:"Dean DeBlois e Chris Sanders",c:["Jay Baruchel","Gerard Butler"],s:"Um jovem viking faz amizade com um dragão ferido e desafia séculos de guerra entre as espécies.",st:"Universal+"},
+{t:"Vida de Inseto",o:"A Bug's Life",y:1998,g:["Animação","Aventura","Comédia"],d:"John Lasseter",c:["Dave Foley","Kevin Spacey"],s:"Uma formiga inventiva recruta insetos circenses para defender o formigueiro de gafanhotos opressores.",st:"Disney+"},
+{t:"Os Incríveis",o:"The Incredibles",y:2004,g:["Animação","Ação","Aventura"],d:"Brad Bird",c:["Craig T. Nelson","Holly Hunter"],s:"Uma família de super-heróis aposentados volta à ativa para deter uma ameaça e reencontrar a união.",st:"Disney+"},
+{t:"Valente",o:"Brave",y:2012,g:["Animação","Aventura","Família"],d:"Mark Andrews e Brenda Chapman",c:["Kelly Macdonald","Emma Thompson"],s:"Uma princesa escocesa rebelde desafia tradições e desencadeia uma maldição que ela precisa desfazer.",st:"Disney+"},
+{t:"Viva: A Vida É uma Festa",o:"Coco",y:2017,g:["Animação","Aventura","Família"],d:"Lee Unkrich",c:["Anthony Gonzalez","Gael García Bernal"],s:"Um menino apaixonado por música viaja à Terra dos Mortos para desvendar o segredo de sua família.",st:"Disney+"},
+{t:"Frozen: Uma Aventura Congelante",o:"Frozen",y:2013,g:["Animação","Aventura","Musical"],d:"Chris Buck e Jennifer Lee",c:["Kristen Bell","Idina Menzel"],s:"Uma princesa parte para encontrar a irmã cujos poderes mágicos mergulharam o reino num inverno eterno.",st:"Disney+"},
+{t:"Moana: Um Mar de Aventuras",o:"Moana",y:2016,g:["Animação","Aventura","Musical"],d:"Ron Clements e John Musker",c:["Auli'i Cravalho","Dwayne Johnson"],s:"Uma jovem navegadora cruza o oceano com um semideus para salvar seu povo de uma maldição.",st:"Disney+"},
+{t:"Zootopia: Essa Cidade É o Bicho",o:"Zootopia",y:2016,g:["Animação","Aventura","Comédia"],d:"Byron Howard e Rich Moore",c:["Ginnifer Goodwin","Jason Bateman"],s:"Uma coelha policial e uma raposa trapaceira desvendam uma conspiração numa metrópole de animais.",st:"Disney+"},
+{t:"Wallace & Gromit: A Batalha dos Vegetais",o:"The Curse of the Were-Rabbit",y:2005,g:["Animação","Comédia","Família"],d:"Nick Park e Steve Box",c:["Peter Sallis","Ralph Fiennes"],s:"Uma dupla de exterminadores de pragas enfrenta uma criatura que ameaça a feira de vegetais da cidade.",st:"Universal+"},
+{t:"Persépolis",o:"Persepolis",y:2007,g:["Animação","Drama","Biografia"],d:"Marjane Satrapi",c:["Chiara Mastroianni","Catherine Deneuve"],s:"Uma jovem cresce em meio à revolução iraniana e tenta encontrar sua identidade dentro e fora do país.",st:"Globoplay"},
+{t:"Valsa com Bashir",o:"Vals Im Bashir",y:2008,g:["Animação","Documentário","Guerra"],d:"Ari Folman",c:["Ari Folman"],s:"Um veterano tenta recuperar memórias apagadas de sua participação numa guerra traumática.",st:"Globoplay"},
+{t:"Anomalisa",o:"Anomalisa",y:2015,g:["Animação","Drama","Romance"],d:"Charlie Kaufman e Duke Johnson",c:["David Thewlis","Jennifer Jason Leigh"],s:"Um homem entediado com a mesmice do mundo encontra alguém que, por uma noite, parece única.",st:"Globoplay"},
+{t:"O Menino e a Garça",o:"Kimitachi wa Dou Ikiru ka",y:2023,g:["Animação","Fantasia","Aventura"],d:"Hayao Miyazaki",c:["Soma Santoki","Masaki Suda"],s:"Um menino enlutado segue uma garça falante a um mundo mágico para enfrentar a perda e o crescimento.",st:"Mercado Play"},
+{t:"Your Name",o:"Kimi no Na wa",y:2016,g:["Animação","Romance","Fantasia"],d:"Makoto Shinkai",c:["Ryunosuke Kamiki","Mone Kamishiraishi"],s:"Dois adolescentes que nunca se encontraram começam a trocar de corpo e descobrem um laço cósmico.",st:"Mercado Play"},
+{t:"Akira",o:"Akira",y:1988,g:["Animação","Ficção Científica","Ação"],d:"Katsuhiro Otomo",c:["Mitsuo Iwata","Nozomu Sasaki"],s:"Numa Tóquio futurista, poderes psíquicos incontroláveis ameaçam destruir a cidade novamente.",st:"Mercado Play"},
+{t:"O Conto da Princesa Kaguya",o:"Kaguya-hime no Monogatari",y:2013,g:["Animação","Fantasia","Drama"],d:"Isao Takahata",c:["Aki Asakura"],s:"Uma princesa encontrada dentro de um bambu cresce rápido e busca compreender sua origem e destino.",st:"HBO Max"},
+{t:"O Conformista",o:"Il Conformista",y:1970,g:["Drama","História"],d:"Bernardo Bertolucci",c:["Jean-Louis Trintignant","Stefania Sandrelli"],s:"Um homem busca normalidade aderindo ao fascismo e aceita uma missão que põe à prova sua consciência.",st:"Globoplay"},
+{t:"M, O Vampiro de Düsseldorf",o:"M",y:1931,g:["Crime","Suspense","Drama"],d:"Fritz Lang",c:["Peter Lorre"],s:"Uma cidade aterrorizada por um assassino de crianças se une, polícia e criminosos, para caçá-lo.",st:"+SBT"},
+{t:"Metrópolis",o:"Metropolis",y:1927,g:["Ficção Científica","Drama"],d:"Fritz Lang",c:["Brigitte Helm","Gustav Fröhlich"],s:"Numa cidade futurista dividida entre elite e operários, um romance acende a faísca de uma revolução.",st:"+SBT"},
+{t:"Nosferatu",o:"Nosferatu",y:1922,g:["Terror"],d:"F.W. Murnau",c:["Max Schreck"],s:"Um conde vampiro espalha morte ao se mudar para uma nova cidade atrás de uma jovem.",st:"+SBT"},
+{t:"O Encouraçado Potemkin",o:"Bronenosets Potyomkin",y:1925,g:["Drama","História"],d:"Sergei Eisenstein",c:["Aleksandr Antonov"],s:"Marinheiros se rebelam contra oficiais opressores e acendem o estopim de uma revolta popular.",st:"+SBT"},
+{t:"A Paixão de Joana D'Arc",o:"La Passion de Jeanne d'Arc",y:1928,g:["Drama","História"],d:"Carl Theodor Dreyer",c:["Renée Jeanne Falconetti"],s:"O julgamento e martírio de Joana D'Arc retratados com intensidade emocional dilacerante.",st:"+SBT"},
+{t:"Tempo de Vencer",o:"Rocky: Um Lutador",y:1976,g:["Drama","Esporte"],d:"John G. Avildsen",c:["Sylvester Stallone","Talia Shire"],s:"Um boxeador desconhecido ganha a chance da vida de enfrentar o campeão mundial e prova seu valor.",st:"Prime Video"},
+{t:"Por Um Punhado de Dólares",o:"Per un Pugno di Dollari",y:1964,g:["Faroeste","Ação"],d:"Sergio Leone",c:["Clint Eastwood","Marianne Koch"],s:"Um pistoleiro silencioso explora a rivalidade entre dois clãs numa cidade fronteiriça.",st:"Prime Video"},
+{t:"Três Homens em Conflito",o:"Il Buono, il Brutto, il Cattivo",y:1966,g:["Faroeste","Aventura"],d:"Sergio Leone",c:["Clint Eastwood","Lee Van Cleef","Eli Wallach"],s:"Três pistoleiros caçam um tesouro enterrado durante a Guerra Civil americana, cada um por si.",st:"Prime Video"},
+{t:"Paris, Texas",o:"Paris, Texas",y:1984,g:["Drama"],d:"Wim Wenders",c:["Harry Dean Stanton","Nastassja Kinski"],s:"Um homem que reaparece após anos desaparecido tenta reconstruir o vínculo com o filho e a esposa.",st:"Mercado Play"},
+{t:"Asas do Desejo",o:"Der Himmel über Berlin",y:1987,g:["Drama","Fantasia","Romance"],d:"Wim Wenders",c:["Bruno Ganz","Solveig Dommartin"],s:"Um anjo que observa Berlim em silêncio se apaixona por uma trapezista e deseja se tornar humano.",st:"Mercado Play"},
+{t:"A Doce Vida dos Outros",o:"Das Leben der Anderen",y:2006,g:["Drama","Suspense"],d:"Florian Henckel von Donnersmarck",c:["Ulrich Mühe","Sebastian Koch"],s:"Um agente da Stasi designado para vigiar um casal de artistas começa a se transformar pelo que escuta.",st:"Prime Video"},
+{t:"Corra, Lola, Corra",o:"Lola rennt",y:1998,g:["Suspense","Drama"],d:"Tom Tykwer",c:["Franka Potente","Moritz Bleibtreu"],s:"Uma jovem tem vinte minutos para conseguir dinheiro e salvar o namorado, repetindo o dia de formas diferentes.",st:"Prime Video"},
+{t:"O Farol",o:"The Lighthouse",y:2019,g:["Terror","Drama","Mistério"],d:"Robert Eggers",c:["Robert Pattinson","Willem Dafoe"],s:"Dois faroleiros isolados numa ilha enlouquecem aos poucos sob tempestades, álcool e segredos.",st:"Prime Video"},
+{t:"Hard Eight: Jogada de Risco",o:"Hard Eight",y:1996,g:["Crime","Drama"],d:"Paul Thomas Anderson",c:["Philip Baker Hall","John C. Reilly","Gwyneth Paltrow"],s:"Um jogador veterano ensina os truques de Reno a um jovem sem rumo, com consequências imprevistas.",st:"Prime Video"}
+];
+
+
+/* ============ ESTADO / STORAGE ============ */
+const LS_KEY = "cinemortal_v1";
+function loadState(){try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch(e){return{}}}
+function saveState(s){try{localStorage.setItem(LS_KEY,JSON.stringify(s))}catch(e){}}
+let STATE = loadState(); // { "key": {seen:bool, rating:int, comment:str} }
+function keyOf(m){return m.o+"__"+m.y}
+function rec(m){return STATE[keyOf(m)]||{}}
+function setRec(m,patch){const k=keyOf(m);STATE[k]=Object.assign({},STATE[k],patch);saveState(STATE)}
+
+/* ============ CAPAS GERADAS EM CSS ============ */
+const GENRE_HUE={"Drama":18,"Crime":355,"Ação":12,"Ficção Científica":205,"Suspense":265,"Terror":300,
+"Comédia":42,"Romance":335,"Aventura":150,"Animação":190,"Fantasia":275,"Guerra":30,"Faroeste":28,
+"Mistério":250,"Biografia":48,"História":36,"Família":165,"Musical":315,"Música":320,"Documentário":200,
+"Épico":40,"Esporte":120};
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0}return h}
+function posterStyle(m){
+  const baseHue=GENRE_HUE[m.g[0]]!==undefined?GENRE_HUE[m.g[0]]:(hashStr(m.o)%360);
+  const h2=(baseHue+ (hashStr(m.t)%40) +18)%360;
+  const ang=35+(hashStr(m.o)%90);
+  const l1=14+(hashStr(m.t)%10), l2=26+(hashStr(m.o)%14);
+  return `background:linear-gradient(${ang}deg,hsl(${baseHue},42%,${l1}%),hsl(${h2},48%,${l2}%));`;
+}
+function posterInner(m,opts){
+  opts=opts||{};
+  const gn = opts.genre!==false ? `<div class="gn">${m.g.slice(0,2).join(" · ")}</div>` : "";
+  return `<div class="grain"></div><div class="glow"></div><div class="vig"></div>
+    <div class="yr">${m.y}</div><div class="tt">${esc(m.t)}</div>${gn}`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ============ FILTROS / DADOS DERIVADOS ============ */
+const ALL_GENRES=[...new Set(MOVIES.flatMap(m=>m.g))].sort((a,b)=>a.localeCompare(b,'pt'));
+const ALL_STREAMS=[...new Set(MOVIES.map(m=>m.st))].sort((a,b)=>a.localeCompare(b,'pt'));
+const DECADES=[...new Set(MOVIES.map(m=>Math.floor(m.y/10)*10))].sort((a,b)=>b-a);
+
+const el=id=>document.getElementById(id);
+function fillSelect(sel,arr,fmt){arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;sel.appendChild(o)})}
+fillSelect(el('fGenre'),ALL_GENRES);
+fillSelect(el('fStream'),ALL_STREAMS);
+fillSelect(el('fDecade'),DECADES,d=>d+"s ("+d+"–"+(d+9)+")");
+
+const F={genre:'',stream:'',decade:'',director:'',cast:'',title:'',hideSeen:false,onlyRated:false};
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function matches(m){
+  if(F.genre && !m.g.includes(F.genre))return false;
+  if(F.stream && m.st!==F.stream)return false;
+  if(F.decade && Math.floor(m.y/10)*10!==+F.decade)return false;
+  if(F.director && !norm(m.d).includes(norm(F.director)))return false;
+  if(F.cast && !m.c.some(c=>norm(c).includes(norm(F.cast))))return false;
+  if(F.title && !(norm(m.t).includes(norm(F.title))||norm(m.o).includes(norm(F.title))))return false;
+  if(F.hideSeen && rec(m).seen)return false;
+  if(F.onlyRated && !(rec(m).rating))return false;
+  return true;
+}
+function filtered(){return MOVIES.filter(matches)}
+
+/* ============ RENDER GRID ============ */
+const grid=el('grid');
+function renderGrid(){
+  const list=filtered();
+  el('resultCount').textContent=list.length+(list.length===1?" filme":" filmes");
+  if(!list.length){grid.innerHTML='<div class="empty"><div class="big">Nenhum filme encontrado</div><p style="margin-top:10px">Ajuste os filtros para ver mais opções.</p></div>';return}
+  const frag=document.createDocumentFragment();
+  list.forEach((m,i)=>{
+    const r=rec(m);
+    const card=document.createElement('div');
+    card.className='card'+(r.seen?' is-seen':'')+(r.rating?' has-rating':'');
+    card.style.animationDelay=Math.min(i*22,600)+'ms';
+    card.innerHTML=`
+      <div class="seen-badge">visto</div>
+      <div class="mini-stars">${r.rating?'★'.repeat(r.rating):''}</div>
+      <div class="poster" style="${posterStyle(m)}">${posterInner(m)}</div>
+      <div class="stream-tag">${esc(m.st)}</div>`;
+    card.addEventListener('click',()=>openModal(m));
+    frag.appendChild(card);
+  });
+  grid.innerHTML='';grid.appendChild(frag);
+}
+
+/* ============ STATS ============ */
+function updateStats(){
+  const total=MOVIES.length;
+  const seen=MOVIES.filter(m=>rec(m).seen).length;
+  const left=total-seen;
+  el('stTotal').textContent=total;el('stSeen').textContent=seen;el('stLeft').textContent=left;
+  el('catalogCount').textContent=total;
+  el('barSeen').style.width=(total?seen/total*100:0)+'%';
+  el('barLeft').style.width=(total?left/total*100:0)+'%';
+  const pool=filtered().filter(m=>!rec(m).seen);
+  el('btnDraw').disabled=pool.length===0;
+  el('drawHint').textContent=pool.length===0
+    ? 'Nenhum filme disponível para sortear com os filtros atuais.'
+    : `${pool.length} ${pool.length===1?'filme disponível':'filmes disponíveis'} para sorteio (respeitando filtros)`;
+}
+
+/* ============ FILTER EVENTS ============ */
+function bindFilter(id,key,ev){el(id).addEventListener(ev||'change',e=>{F[key]=e.target.type==='checkbox'?e.target.checked:e.target.value;renderGrid();updateStats()})}
+bindFilter('fGenre','genre');bindFilter('fStream','stream');bindFilter('fDecade','decade');
+bindFilter('fDirector','director','input');bindFilter('fCast','cast','input');bindFilter('fTitle','title','input');
+bindFilter('fHideSeen','hideSeen');bindFilter('fOnlyRated','onlyRated');
+el('btnClear').addEventListener('click',()=>{
+  Object.keys(F).forEach(k=>F[k]=(typeof F[k]==='boolean')?false:'');
+  ['fGenre','fStream','fDecade','fDirector','fCast','fTitle'].forEach(i=>el(i).value='');
+  ['fHideSeen','fOnlyRated'].forEach(i=>el(i).checked=false);
+  renderGrid();updateStats();
+});
+
+/* ============ SOM (Web Audio, sem arquivos) ============ */
+let soundOn=false,audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return audioCtx}
+function tick(freq=420,dur=0.04,vol=0.08){if(!soundOn)return;const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(c.destination);const t=c.currentTime;o.start(t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.stop(t+dur)}
+function ding(){if(!soundOn)return;const c=ac();if(!c)return;[660,880,1320].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(c.destination);const t=c.currentTime+i*0.02;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.18,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.9);o.start(t);o.stop(t+0.9)})}
+el('soundToggle').addEventListener('click',()=>{soundOn=!soundOn;if(soundOn)ac();el('soundToggle').innerHTML=soundOn?'&#128266;':'&#128263;'});
+
+/* ============ SORTEIO + ANIMAÇÃO ============ */
+const overlay=el('drawOverlay'),reelTrack=el('reelTrack'),reelStage=el('reelStage'),reveal=el('reveal');
+let drawing=false,tickTimers=[],winner=null;
+const ITEM_W=180+16, SM_W=140+16;
+function itemWidth(){return window.innerWidth<=560?SM_W:ITEM_W}
+
+function buildReel(pool,win){
+  reelTrack.innerHTML='';
+  const N=42; const items=[];
+  for(let i=0;i<N;i++){items.push(pool[Math.floor(Math.random()*pool.length)])}
+  items.push(win); // winner at the end
+  items.forEach(m=>{
+    const d=document.createElement('div');
+    d.className='reel-item';d.style.cssText=posterStyle(m);
+    d.innerHTML=`<div class="grain"></div><div class="glow"></div><div class="vig"></div><div class="yr">${m.y}</div><div class="tt">${esc(m.t)}</div>`;
+    reelTrack.appendChild(d);
+  });
+  return items.length;
+}
+function clearTicks(){tickTimers.forEach(t=>clearTimeout(t));tickTimers=[]}
+
+function doDraw(){
+  if(drawing)return;
+  const pool=filtered().filter(m=>!rec(m).seen);
+  if(!pool.length)return;
+  drawing=true;
+  winner=pool[Math.floor(Math.random()*pool.length)];
+  reveal.classList.remove('show');reelStage.style.display='';
+  overlay.classList.add('active');
+  const count=buildReel(pool,winner);
+  // reset position
+  reelTrack.style.transition='none';
+  reelTrack.style.transform='translateX(0)';
+  // compute final offset so winner (last item) lands centered on marker
+  const iw=itemWidth();
+  const finalIndex=count-1;
+  const target=-(finalIndex*iw); // track has padding-left:50%, item flex start; center marker at 50%
+  // small random jitter so it doesn't always center identically
+  const jitter=(Math.random()*40-20);
+  void reelTrack.offsetWidth; // reflow
+  const DUR=4200;
+  reelTrack.style.transition=`transform ${DUR}ms cubic-bezier(.10,.78,.12,1)`;
+  reelTrack.style.transform=`translateX(calc(${target}px - 90px + ${jitter}px))`;
+  // schedule decelerating ticks
+  clearTicks();
+  let t=0,gap=55;
+  while(t<DUR-300){tickTimers.push(setTimeout(()=>tick(360+Math.random()*120),t));t+=gap;gap*=1.085}
+  // reveal after animation
+  tickTimers.push(setTimeout(showReveal,DUR+120));
+}
+function showReveal(){
+  ding();
+  reelStage.style.display='none';
+  const m=winner;
+  el('revealPoster').style.cssText=posterStyle(m);
+  el('revealPoster').innerHTML=`<div class="grain"></div><div class="glow"></div><div class="vig"></div><div class="yr">${m.y}</div><div class="tt">${esc(m.t)}</div>`;
+  el('revealTitle').textContent=m.t;
+  el('revealMeta').textContent=`${m.o!==m.t?m.o+' · ':''}${m.y} · ${m.g.join(', ')} · dir. ${m.d}`;
+  el('revealStream').textContent='Assinatura: '+m.st;
+  reveal.classList.add('show');
+  drawing=false;clearTicks();
+}
+function skipDraw(){if(!drawing)return;clearTicks();reelTrack.style.transition='none';showReveal()}
+function closeOverlay(){overlay.classList.remove('active');reveal.classList.remove('show');reelStage.style.display='';clearTicks();drawing=false}
+
+el('btnDraw').addEventListener('click',()=>{if(soundOn)ac();doDraw()});
+el('drawSkip').addEventListener('click',skipDraw);
+el('revealAgain').addEventListener('click',doDraw);
+el('revealClose').addEventListener('click',closeOverlay);
+el('revealOpen').addEventListener('click',()=>{closeOverlay();openModal(winner)});
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeOverlay()});
+
+/* ============ MODAL ============ */
+const modal=el('modal');let current=null,draftRating=0;
+function openModal(m){
+  current=m;const r=rec(m);
+  el('mPoster').style.cssText=posterStyle(m);
+  el('mPoster').innerHTML=`<div class="grain"></div><div class="glow"></div><div class="vig"></div><div class="yr">${m.y}</div><div class="tt">${esc(m.t)}</div>`;
+  el('mTitle').textContent=m.t;
+  el('mOrig').textContent=m.o!==m.t?m.o+' ('+m.y+')':('('+m.y+')');
+  el('mTags').innerHTML=m.g.map(g=>`<span class="tag">${esc(g)}</span>`).join('')+`<span class="tag stream">${esc(m.st)}</span>`;
+  el('mDirector').innerHTML=`<b>Direção:</b> ${esc(m.d)}`;
+  el('mCast').innerHTML=`<b>Elenco:</b> ${m.c.map(esc).join(', ')}`;
+  el('mSynopsis').textContent=m.s;
+  draftRating=r.rating||0;paintStars(draftRating);
+  el('mComment').value=r.comment||'';
+  setSeenUI(!!r.seen);
+  el('mSaveNote').classList.remove('show');
+  modal.classList.add('active');document.body.style.overflow='hidden';
+}
+function closeModal(){modal.classList.remove('active');document.body.style.overflow='';current=null}
+el('modalClose').addEventListener('click',closeModal);
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeOverlay()}});
+
+/* stars */
+const starsWrap=el('mStars');
+const RATE_TXT=['Toque nas estrelas','Péssimo','Ruim','Regular','Bom','Obra-prima'];
+for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star';s.textContent='★';s.dataset.v=i;
+  s.addEventListener('mouseenter',()=>paintStars(i,true));
+  s.addEventListener('mouseleave',()=>paintStars(draftRating));
+  s.addEventListener('click',()=>{draftRating=(draftRating===i?0:i);paintStars(draftRating)});
+  starsWrap.appendChild(s)}
+function paintStars(n,hover){[...starsWrap.children].forEach((s,idx)=>s.classList.toggle('on',idx<n));
+  el('mRateLabel').textContent=RATE_TXT[hover?n:draftRating]||RATE_TXT[0]}
+
+/* seen toggle */
+let draftSeen=false;
+function setSeenUI(on){draftSeen=on;el('mSeen').classList.toggle('on',on);el('mSeenLabel').textContent=on?'Visto ✓ (não será sorteado)':'Marcar como visto'}
+el('mSeen').addEventListener('click',()=>setSeenUI(!draftSeen));
+
+/* save */
+el('mSave').addEventListener('click',()=>{
+  if(!current)return;
+  setRec(current,{seen:draftSeen,rating:draftRating,comment:el('mComment').value.trim()});
+  el('mSaveNote').classList.add('show');
+  renderGrid();updateStats();
+  setTimeout(()=>el('mSaveNote').classList.remove('show'),2200);
+});
+
+/* ============ INIT ============ */
+renderGrid();updateStats();
+</script>
+</body>
+</html>
